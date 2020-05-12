@@ -4,7 +4,7 @@ import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.BDDAssertions.then;
 
-public class BrokerClientTest {
+public class BrokerClientTests {
 
     @Test
     public void given_Client_when_connectWithBroker_then_Ok() {

@@ -17,9 +17,11 @@
 
       <lombok.version>1.18.10</lombok.version>
 
+      <org.eclipse.jgit.version>5.7.0.202003110725-r</org.eclipse.jgit.version>
+
       <junit.jupiter.version>5.5.2</junit.jupiter.version>
       <assertj-core.version>3.13.2</assertj-core.version>
-      <org.eclipse.jgit.version>3.5.0.201409260305-r</org.eclipse.jgit.version>
+      <awaitility.version>3.0.0</awaitility.version>
 
       <checkstyle.skip>true</checkstyle.skip>
   </properties>
@@ -37,6 +39,23 @@
           <groupId>org.eclipse.jgit</groupId>
           <artifactId>org.eclipse.jgit</artifactId>
           <version>${org.eclipse.jgit.version}</version>
+      </dependency>
+
+      <dependency>
+          <groupId>ch.qos.logback</groupId>
+          <artifactId>logback-classic</artifactId>
+          <version>1.2.3</version>
+      </dependency>
+
+      <dependency>
+          <groupId>commons-io</groupId>
+          <artifactId>commons-io</artifactId>
+          <version>2.6</version>
+      </dependency>
+      <dependency>
+          <groupId>com.google.errorprone</groupId>
+          <artifactId>error_prone_core</artifactId>
+          <version>2.3.4</version>
       </dependency>
 
       <dependency>
@@ -72,6 +91,13 @@
           <scope>test</scope>
       </dependency>
 
+      <dependency>
+          <groupId>org.awaitility</groupId>
+          <artifactId>awaitility</artifactId>
+          <version>${awaitility.version}</version>
+          <scope>test</scope>
+      </dependency>
+
   </dependencies>
 
   <build>
@@ -94,6 +120,8 @@
               <source>${java.version}</source>
               <target>${java.version}</target>
               <encoding>${project.build.sourceEncoding}</encoding>
+              <showWarnings>true</showWarnings>
+              <showDeprecation>true</showDeprecation>
           </configuration>
         </plugin>
         <plugin>
