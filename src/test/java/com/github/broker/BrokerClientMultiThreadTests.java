@@ -7,8 +7,6 @@ import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.IntStream;
 
@@ -32,8 +30,6 @@ public class BrokerClientMultiThreadTests {
         then(results.stream().count()).isEqualTo(2);
     }
 
-    private static ExecutorService executor = Executors.newFixedThreadPool(10);
-
     private interface Client {
 
         Logger LOGGER = LoggerFactory.getLogger(Client.class);
@@ -44,7 +40,7 @@ public class BrokerClientMultiThreadTests {
 
             LOGGER.info("Thread: {}", Thread.currentThread().getName());
             CompletableFuture<Integer> future = CompletableFuture
-                .supplyAsync(() -> run(), executor)
+                .supplyAsync(() -> run())
                 .exceptionally(ex -> {
                     LOGGER.error(ex.getLocalizedMessage(), ex);
                     return 0;
