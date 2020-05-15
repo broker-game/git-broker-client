@@ -1,7 +1,6 @@
 package com.github.broker;
 
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.io.FileUtils;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.lib.ProgressMonitor;
@@ -16,11 +15,9 @@ import org.junit.jupiter.api.Test;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.time.Instant;
-import java.util.PrimitiveIterator;
-import java.util.Spliterator;
-import java.util.Spliterators;
-import java.util.stream.Stream;
+import java.util.Comparator;
 import java.util.stream.StreamSupport;
 
 import static java.util.Collections.singleton;
@@ -50,7 +47,7 @@ public class JGitCoreOperationTests {
         }
 
         // clean up here to not keep using more and more disk-space for these samples
-        FileUtils.deleteDirectory(localPath);
+        deleteDirectory(localPath);
     }
 
     @Test
@@ -70,7 +67,7 @@ public class JGitCoreOperationTests {
         }
 
         // clean up here to not keep using more and more disk-space for these samples
-        FileUtils.deleteDirectory(localPath);
+        deleteDirectory(localPath);
     }
 
     @Test
@@ -90,7 +87,7 @@ public class JGitCoreOperationTests {
         }
 
         // clean up here to not keep using more and more disk-space for these samples
-        FileUtils.deleteDirectory(localPath);
+        deleteDirectory(localPath);
     }
 
     @Test
@@ -112,7 +109,7 @@ public class JGitCoreOperationTests {
         }
 
         // clean up here to not keep using more and more disk-space for these samples
-        FileUtils.deleteDirectory(localPath);
+        deleteDirectory(localPath);
     }
 
     @Disabled
@@ -140,10 +137,8 @@ public class JGitCoreOperationTests {
         }
 
         // clean up here to not keep using more and more disk-space for these samples
-        FileUtils.deleteDirectory(localPath);
+        deleteDirectory(localPath);
     }
-
-
 
     private void push(Git git) throws GitAPIException {
         CredentialsProvider cp = new UsernamePasswordCredentialsProvider(GIT_USER, GIT_PASSWORD);
@@ -190,7 +185,20 @@ public class JGitCoreOperationTests {
         }
 
         // clean up here to not keep using more and more disk-space for these samples
-        FileUtils.deleteDirectory(localPath);
+        deleteDirectory(localPath);
+    }
+
+    private void deleteDirectory(File localPath) {
+        try {
+            Files.walk(localPath.toPath())
+                .sorted(Comparator.reverseOrder())
+                .map(Path::toFile)
+                .forEach(File::delete);
+
+            assert(!localPath.exists());
+        } catch (IOException e) {
+            LOGGER.warn(e.getLocalizedMessage(), e);
+        }
     }
 
     private static class SimpleProgressMonitor implements ProgressMonitor {

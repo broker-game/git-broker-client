@@ -1,34 +1,35 @@
 package com.github.broker;
 
+import lombok.extern.slf4j.Slf4j;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.BDDAssertions.then;
 
+@Slf4j
 public class BrokerClientTests {
+
+    private BrokerClientConfig defaultConfig;
+    private BrokerClient defaultBrokerClient;
+
+    @BeforeEach
+    public void setUp(){
+        defaultConfig = new BrokerClientConfig();
+        defaultBrokerClient = new BrokerClient(defaultConfig);
+    }
+
+    @AfterEach
+    public void close() {
+        defaultBrokerClient.close();
+    }
 
     @Test
     public void given_Client_when_connectWithBroker_then_Ok() {
 
-        final String USER = "demo";
-        final String PASSWORD = "demo";
+        var result =  defaultBrokerClient.connect();
 
-        BrokerClient brokerClient = new BrokerClient(USER, PASSWORD);
-
-        then(brokerClient.connect()).isEqualTo(true);
-    }
-
-    @Test
-    public void given_Client_when_triggerEvent_then_Ok() {
-
-        final String USER = "demo";
-        final String PASSWORD = "demo";
-        final String APPLICATION = "demo";
-        final String EVENT = "ping";
-        final Message MESSAGE = new Message();
-
-        BrokerClient brokerClient = new BrokerClient(USER, PASSWORD);
-
-        then(brokerClient.send(APPLICATION, EVENT, MESSAGE)).isEqualTo(true);
+        then(result).isEqualTo(true);
     }
 
     private static class Message {
@@ -36,16 +37,25 @@ public class BrokerClientTests {
     }
 
     @Test
-    public void given_Client_when_waitForEvent_then_Ok() {
+    public void given_Client_when_produceEvent_then_Ok() {
 
-        final String USER = "demo";
-        final String PASSWORD = "demo";
-        final String APPLICATION = "demo";
-        final String EVENT = "ping";
+        defaultBrokerClient.connect();
 
-        BrokerClient brokerClient = new BrokerClient(USER, PASSWORD);
+        final String EVENT = "PING";
+        final Message MESSAGE = new Message();
 
-        BrokerResponse response = brokerClient.wait(APPLICATION, EVENT);
+        then(defaultBrokerClient.produce(EVENT, MESSAGE)).isEqualTo(true);
+    }
+
+    @Test
+    public void given_Client_when_consumeForEvent_then_Ok() {
+
+        defaultBrokerClient.connect();
+        final String EVENT = "PING";
+        final int poolingPeriod = 1;
+
+        BrokerResponse response = defaultBrokerClient.consume(EVENT, poolingPeriod);
         then(response).isNotNull();
     }
+
 }

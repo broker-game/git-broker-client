@@ -48,11 +48,6 @@
       </dependency>
 
       <dependency>
-          <groupId>commons-io</groupId>
-          <artifactId>commons-io</artifactId>
-          <version>2.6</version>
-      </dependency>
-      <dependency>
           <groupId>com.google.errorprone</groupId>
           <artifactId>error_prone_core</artifactId>
           <version>2.3.4</version>
@@ -76,11 +71,34 @@
           <version>${junit.jupiter.version}</version>
           <scope>test</scope>
       </dependency>
+      <dependency>
+          <groupId>org.junit.vintage</groupId>
+          <artifactId>junit-vintage-engine</artifactId>
+          <version>5.5.2</version>
+      </dependency>
 
       <dependency>
+          <groupId>org.powermock</groupId>
+          <artifactId>powermock-module-junit4</artifactId>
+          <version>2.0.2</version>
+          <scope>test</scope>
+      </dependency>
+      <dependency>
+          <groupId>org.powermock</groupId>
+          <artifactId>powermock-api-mockito2</artifactId>
+          <version>2.0.2</version>
+          <scope>test</scope>
+      </dependency>
+      <dependency>
+          <groupId>junit</groupId>
+          <artifactId>junit</artifactId>
+          <version>4.12</version>
+          <scope>test</scope>
+      </dependency>
+      <dependency>
           <groupId>org.mockito</groupId>
-          <artifactId>mockito-all</artifactId>
-          <version>1.10.19</version>
+          <artifactId>mockito-junit-jupiter</artifactId>
+          <version>3.1.0</version>
           <scope>test</scope>
       </dependency>
 
