@@ -2,24 +2,6 @@ package com.github.broker;
 
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import org.eclipse.jgit.api.Git;
-import org.eclipse.jgit.api.errors.AbortedByHookException;
-import org.eclipse.jgit.api.errors.CanceledException;
-import org.eclipse.jgit.api.errors.ConcurrentRefUpdateException;
-import org.eclipse.jgit.api.errors.GitAPIException;
-import org.eclipse.jgit.api.errors.InvalidConfigurationException;
-import org.eclipse.jgit.api.errors.InvalidRemoteException;
-import org.eclipse.jgit.api.errors.NoFilepatternException;
-import org.eclipse.jgit.api.errors.NoHeadException;
-import org.eclipse.jgit.api.errors.NoMessageException;
-import org.eclipse.jgit.api.errors.RefNotAdvertisedException;
-import org.eclipse.jgit.api.errors.RefNotFoundException;
-import org.eclipse.jgit.api.errors.TransportException;
-import org.eclipse.jgit.api.errors.UnmergedPathsException;
-import org.eclipse.jgit.api.errors.WrongRepositoryStateException;
-import org.eclipse.jgit.transport.CredentialsProvider;
-import org.eclipse.jgit.transport.PushResult;
-import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
 
 import java.io.File;
 import java.io.IOException;
@@ -29,16 +11,12 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Objects;
 import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
 
 @Slf4j
 public class BrokerClient {
 
-    //Local File System
-    private File localFS;
-
-    //Git repository
-    private Git git;
+    LocalRepository localRepository;
+    GitWrapper gitWrapper;
 
     //Branch
     private final String application;
@@ -73,6 +51,9 @@ public class BrokerClient {
         this.email = email;
         this.user = user;
         this.password = password;
+
+        this.localRepository = new LocalRepository();
+        this.gitWrapper = new GitWrapper();
     }
 
     /**
@@ -99,25 +80,10 @@ public class BrokerClient {
      */
     public boolean connect() {
 
-        try {
-            this.localFS = this.prepareFolderForGit();
-            this.git = Git.cloneRepository()
-                .setURI(broker)
-                .setDirectory(this.localFS)
-                //.setBranchesToClone(singleton("refs/heads/master"))
-                .setProgressMonitor(new SimpleProgressMonitor())
-                .call();
+        localRepository.createLocalRepository(this.node);
+        gitWrapper.cloneRepository(localRepository.getLocalFS(), this.broker, this.application);
 
-            git.checkout()
-                .setCreateBranch(true)
-                .setName(this.application)
-                .call();
-
-            return true;
-        } catch (GitAPIException | IOException e) {
-            LOGGER.warn(e.getLocalizedMessage(), e);
-            return false;
-        }
+        return true;
     }
 
     /**
@@ -129,31 +95,12 @@ public class BrokerClient {
      */
     public boolean produce(String event, Object message) {
 
-        upgradeRepository();
         final String fileName = this.getFilename(event);
-        addFile(fileName, message.toString());
-        push();
+        gitWrapper.upgradeRepository(this.application);
+        gitWrapper.addFile(this.localRepository.getLocalFS(), fileName, message.toString(), this.fullName, this.email);
+        gitWrapper.push(user, password);
 
         return true;
-    }
-
-    private void upgradeRepository() {
-        try {
-            git.fetch().setForceUpdate(true).setRemote("origin").call();
-            git.pull().setRemoteBranchName(this.application).setProgressMonitor(new SimpleProgressMonitor()).call();
-        } catch (WrongRepositoryStateException |
-            InvalidConfigurationException |
-            CanceledException |
-            InvalidRemoteException |
-            TransportException |
-            RefNotFoundException |
-            NoHeadException |
-            RefNotAdvertisedException e) {
-
-            LOGGER.warn(e.getLocalizedMessage());
-        } catch (GitAPIException e) {
-            LOGGER.warn(e.getLocalizedMessage());
-        }
     }
 
     private String getFilename(String event) {
@@ -164,50 +111,6 @@ public class BrokerClient {
 
     private long getEpoch() {
         return System.currentTimeMillis();
-    }
-
-    private void addFile(String fileName, String content) {
-
-        try {
-            Files.writeString(this.localFS.toPath().resolve(fileName), content);
-            git.add().addFilepattern(fileName).call();
-            git.commit()
-                .setMessage("Creating file: " + fileName)
-                .setAuthor(this.fullName, this.email)
-                .call();
-        } catch (UnmergedPathsException |
-            WrongRepositoryStateException |
-            AbortedByHookException |
-            NoMessageException |
-            NoFilepatternException |
-            NoHeadException |
-            ConcurrentRefUpdateException |
-            IOException e) {
-
-            LOGGER.warn(e.getLocalizedMessage(), e);
-        } catch (GitAPIException e) {
-            LOGGER.warn(e.getLocalizedMessage(), e);
-        }
-    }
-
-    private void push() {
-
-        try {
-            CredentialsProvider cp = new UsernamePasswordCredentialsProvider(this.user, this.password);
-            Iterable<PushResult> results = git.push()
-                .setRemote("origin")
-                .setCredentialsProvider(cp)
-                .call();
-
-            StreamSupport.stream(results.spliterator(), false)
-                .forEach(result -> {
-                    LOGGER.info(result.getMessages());
-                });
-        } catch (InvalidRemoteException | TransportException e) {
-            LOGGER.warn(e.getLocalizedMessage(), e);
-        } catch (GitAPIException e) {
-            LOGGER.warn(e.getLocalizedMessage(), e);
-        }
     }
 
     /**
@@ -222,12 +125,12 @@ public class BrokerClient {
         getInfiniteStream()
             .map(x -> {
                 sleep(poolingPeriod);
-                upgradeRepository();
+                gitWrapper.upgradeRepository(this.application);
                 return x;
             })
             .map(x -> {
 
-                Arrays.stream(this.localFS.list())
+                Arrays.stream(this.localRepository.getLocalFS().list())
                     .filter(y -> y.indexOf(".json") != -1)
                     //.peek(System.out::println)
                     .map(BrokerFileParser::new)
@@ -244,8 +147,8 @@ public class BrokerClient {
             .count();
 
         final String fileName = this.getFilename("OK");
-        addFile(fileName, "PROCESSED");
-        push();
+        gitWrapper.addFile(this.localRepository.getLocalFS(), fileName, "PROCESSED", fullName, email);
+        gitWrapper.push(user, password);
 
         return new BrokerResponse();
     }
@@ -259,31 +162,31 @@ public class BrokerClient {
         Thread.sleep(seconds * 1000);
     }
 
-    private File prepareFolderForGit() throws IOException {
-        File localPath = File.createTempFile("BROKER_CLIENT" + "_" + this.node + "_", "");
-        if (!localPath.delete()) {
-            throw new IOException("Could not delete temporary file " + localPath);
-        }
-        System.out.println(localPath.getAbsolutePath());
-        return localPath;
-    }
-
     /**
      * Close
      */
     public void close() {
 
-        if (Objects.nonNull(this.localFS)) {
+        if (Objects.nonNull(this.localRepository.getLocalFS())) {
             try {
-                Files.walk(this.localFS.toPath())
+                Files.walk(this.localRepository.getLocalFS().toPath())
                     .sorted(Comparator.reverseOrder())
                     .map(Path::toFile)
                     .forEach(File::delete);
 
-                assert (!this.localFS.exists());
+                assert (!this.localRepository.getLocalFS().exists());
             } catch (IOException e) {
                 LOGGER.warn(e.getLocalizedMessage(), e);
             }
         }
+    }
+
+    //Testing purposes
+    public void setLocalRepository(LocalRepository localRepository) {
+        this.localRepository = localRepository;
+    }
+
+    public void setGitWrapper(GitWrapper gitWrapper) {
+        this.gitWrapper = gitWrapper;
     }
 }
