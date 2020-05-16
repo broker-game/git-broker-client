@@ -148,8 +148,12 @@
               <suppressionsLocation>config/checkstyle/suppressions.xml</suppressionsLocation>
               <encoding>UTF-8</encoding>
               <consoleOutput>true</consoleOutput>
+              <violationSeverity>warning</violationSeverity>
               <failsOnError>true</failsOnError>
-              <includeTestSourceDirectory>true</includeTestSourceDirectory>
+              <failOnViolation>true</failOnViolation>
+              <logViolationsToConsole>true</logViolationsToConsole>
+              <logViolationCountToConsole>true</logViolationCountToConsole>
+              <includeTestSourceDirectory>false</includeTestSourceDirectory>
           </configuration>
             <dependencies>
                 <dependency>
@@ -160,6 +164,7 @@
             </dependencies>
             <executions>
                 <execution>
+                    <phase>process-sources</phase>
                     <goals>
                         <goal>check</goal>
                     </goals>

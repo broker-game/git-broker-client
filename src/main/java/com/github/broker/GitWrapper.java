@@ -2,7 +2,20 @@ package com.github.broker;
 
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.jgit.api.Git;
-import org.eclipse.jgit.api.errors.*;
+import org.eclipse.jgit.api.errors.AbortedByHookException;
+import org.eclipse.jgit.api.errors.CanceledException;
+import org.eclipse.jgit.api.errors.ConcurrentRefUpdateException;
+import org.eclipse.jgit.api.errors.GitAPIException;
+import org.eclipse.jgit.api.errors.InvalidConfigurationException;
+import org.eclipse.jgit.api.errors.InvalidRemoteException;
+import org.eclipse.jgit.api.errors.NoFilepatternException;
+import org.eclipse.jgit.api.errors.NoHeadException;
+import org.eclipse.jgit.api.errors.NoMessageException;
+import org.eclipse.jgit.api.errors.RefNotAdvertisedException;
+import org.eclipse.jgit.api.errors.RefNotFoundException;
+import org.eclipse.jgit.api.errors.TransportException;
+import org.eclipse.jgit.api.errors.UnmergedPathsException;
+import org.eclipse.jgit.api.errors.WrongRepositoryStateException;
 import org.eclipse.jgit.transport.CredentialsProvider;
 import org.eclipse.jgit.transport.PushResult;
 import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
@@ -18,6 +31,13 @@ public class GitWrapper {
     //Git repository
     private Git git;
 
+    /**
+     * Clone a repository
+     *
+     * @param file file
+     * @param repository repository
+     * @param branch branch
+     */
     public void cloneRepository(File file, String repository, String branch) {
 
         try {
@@ -38,6 +58,11 @@ public class GitWrapper {
         }
     }
 
+    /**
+     * Upgrade current repository
+     *
+     * @param branch branch
+     */
     public void upgradeRepository(String branch) {
         try {
             git.fetch().setForceUpdate(true).setRemote("origin").call();
@@ -57,6 +82,15 @@ public class GitWrapper {
         }
     }
 
+    /**
+     * Add File
+     *
+     * @param file file
+     * @param fileName filename
+     * @param content content
+     * @param fullName fullName
+     * @param email email
+     */
     public void addFile(File file, String fileName, String content, String fullName, String email) {
 
         try {
@@ -81,6 +115,11 @@ public class GitWrapper {
         }
     }
 
+    /**
+     * Push
+     * @param user user
+     * @param password password
+     */
     public void push(String user, String password) {
 
         try {

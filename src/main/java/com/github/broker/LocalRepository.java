@@ -8,10 +8,11 @@ public class LocalRepository {
     //Local File System
     private File localFS;
 
-    public LocalRepository() {
-
-    }
-
+    /**
+     * Create the local directory to clone a Git repository
+     *
+     * @param node node
+     */
     public void createLocalRepository(String node) {
         try {
             this.localFS = prepareFolderForGit(node);
