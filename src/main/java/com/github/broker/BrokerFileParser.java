@@ -9,6 +9,11 @@ public class BrokerFileParser {
     private final String node;
     private final String event;
 
+    /**
+     * Constructor
+     *
+     * @param fileName fileName
+     */
     public BrokerFileParser(String fileName) {
         String[] parts = fileName.split("\\.");
         var fileNameParts = parts[0].split("_");

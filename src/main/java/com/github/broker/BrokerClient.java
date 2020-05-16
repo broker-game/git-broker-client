@@ -3,7 +3,20 @@ package com.github.broker;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.jgit.api.Git;
-import org.eclipse.jgit.api.errors.*;
+import org.eclipse.jgit.api.errors.AbortedByHookException;
+import org.eclipse.jgit.api.errors.CanceledException;
+import org.eclipse.jgit.api.errors.ConcurrentRefUpdateException;
+import org.eclipse.jgit.api.errors.GitAPIException;
+import org.eclipse.jgit.api.errors.InvalidConfigurationException;
+import org.eclipse.jgit.api.errors.InvalidRemoteException;
+import org.eclipse.jgit.api.errors.NoFilepatternException;
+import org.eclipse.jgit.api.errors.NoHeadException;
+import org.eclipse.jgit.api.errors.NoMessageException;
+import org.eclipse.jgit.api.errors.RefNotAdvertisedException;
+import org.eclipse.jgit.api.errors.RefNotFoundException;
+import org.eclipse.jgit.api.errors.TransportException;
+import org.eclipse.jgit.api.errors.UnmergedPathsException;
+import org.eclipse.jgit.api.errors.WrongRepositoryStateException;
 import org.eclipse.jgit.transport.CredentialsProvider;
 import org.eclipse.jgit.transport.PushResult;
 import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
@@ -28,19 +41,31 @@ public class BrokerClient {
     private Git git;
 
     //Branch
-    final private String application;
+    private final String application;
 
     //Node
-    final private String node;
+    private final String node;
 
     //Credentials
-    final private String broker;
-    final private String user;
-    final private String password;
-    final private String fullName;
-    final private String email;
+    private final String broker;
+    private final String user;
+    private final String password;
+    private final String fullName;
+    private final String email;
 
-    public BrokerClient(String broker, String application, String node, String fullName, String email, String user, String password) {
+    /**
+     * Constructor
+     *
+     * @param broker      broker
+     * @param application application
+     * @param node        node
+     * @param fullName    fullName
+     * @param email       email
+     * @param user        user
+     * @param password    password
+     */
+    public BrokerClient(String broker, String application, String node,
+                        String fullName, String email, String user, String password) {
         this.broker = broker;
         this.application = application;
         this.node = node;
@@ -50,6 +75,11 @@ public class BrokerClient {
         this.password = password;
     }
 
+    /**
+     * Constructor
+     *
+     * @param config ConfigFile
+     */
     public BrokerClient(BrokerClientConfig config) {
         this(
             config.getBroker(),
@@ -62,6 +92,11 @@ public class BrokerClient {
         );
     }
 
+    /**
+     * Connect with repository
+     *
+     * @return result
+     */
     public boolean connect() {
 
         try {
@@ -79,12 +114,19 @@ public class BrokerClient {
                 .call();
 
             return true;
-        } catch (GitAPIException | IOException e ) {
+        } catch (GitAPIException | IOException e) {
             LOGGER.warn(e.getLocalizedMessage(), e);
             return false;
         }
     }
 
+    /**
+     * Produce
+     *
+     * @param event event
+     * @param message message
+     * @return
+     */
     public boolean produce(String event, Object message) {
 
         upgradeRepository();
@@ -152,7 +194,7 @@ public class BrokerClient {
 
         try {
             CredentialsProvider cp = new UsernamePasswordCredentialsProvider(this.user, this.password);
-            Iterable<PushResult> results =  git.push()
+            Iterable<PushResult> results = git.push()
                 .setRemote("origin")
                 .setCredentialsProvider(cp)
                 .call();
@@ -168,24 +210,31 @@ public class BrokerClient {
         }
     }
 
+    /**
+     * Consume
+     *
+     * @param event event
+     * @param poolingPeriod Pooling period
+     * @return response
+     */
     public BrokerResponse consume(String event, int poolingPeriod) {
 
         getInfiniteStream()
             .map(x -> {
-              sleep(poolingPeriod);
-              upgradeRepository();
-              return x;
+                sleep(poolingPeriod);
+                upgradeRepository();
+                return x;
             })
             .map(x -> {
 
                 Arrays.stream(this.localFS.list())
-                    .filter(y-> y.indexOf(".json") != -1)
+                    .filter(y -> y.indexOf(".json") != -1)
                     //.peek(System.out::println)
                     .map(BrokerFileParser::new)
                     .filter(b -> b.getEvent().equals(event))
                     .forEach(System.out::println);
 
-                if(x > 1) {
+                if (x > 1) {
                     return null;
                 }
                 return x;
@@ -207,28 +256,31 @@ public class BrokerClient {
 
     @SneakyThrows
     private void sleep(int seconds) {
-        Thread.sleep(seconds * 1000 );
+        Thread.sleep(seconds * 1000);
     }
 
     private File prepareFolderForGit() throws IOException {
         File localPath = File.createTempFile("BROKER_CLIENT" + "_" + this.node + "_", "");
-        if(!localPath.delete()) {
+        if (!localPath.delete()) {
             throw new IOException("Could not delete temporary file " + localPath);
         }
         System.out.println(localPath.getAbsolutePath());
         return localPath;
     }
 
+    /**
+     * Close
+     */
     public void close() {
 
-        if(Objects.nonNull(this.localFS)) {
+        if (Objects.nonNull(this.localFS)) {
             try {
                 Files.walk(this.localFS.toPath())
                     .sorted(Comparator.reverseOrder())
                     .map(Path::toFile)
                     .forEach(File::delete);
 
-                assert(!this.localFS.exists());
+                assert (!this.localFS.exists());
             } catch (IOException e) {
                 LOGGER.warn(e.getLocalizedMessage(), e);
             }

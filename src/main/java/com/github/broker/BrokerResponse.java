@@ -5,5 +5,8 @@ import lombok.Data;
 @Data
 public class BrokerResponse {
 
-    Object body;
+    /**
+     * Message
+     */
+    private Object body;
 }

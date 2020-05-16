@@ -9,6 +9,9 @@ import java.io.InputStream;
 import java.util.Objects;
 import java.util.Properties;
 
+/**
+ *
+ */
 @Slf4j
 @Data
 public class BrokerClientConfig {
@@ -26,6 +29,17 @@ public class BrokerClientConfig {
     //Branch
     final String application;
 
+    /**
+     * Constructor
+     *
+     * @param broker broker
+     * @param application application
+     * @param node node
+     * @param fullName fullName
+     * @param email email
+     * @param user user
+     * @param password password
+     */
     public BrokerClientConfig(String broker, String application, String node,
                               String fullName, String email, String user, String password) {
         this.broker = broker;
@@ -37,6 +51,11 @@ public class BrokerClientConfig {
         this.application = application;
     }
 
+    /**
+     * Constructor
+     *
+     * @param propFileName Property file name
+     */
     public BrokerClientConfig(String propFileName) {
 
         var properties = loadConfigurationFromProperties(propFileName);

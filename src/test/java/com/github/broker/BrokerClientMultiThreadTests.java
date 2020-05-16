@@ -45,7 +45,7 @@ public class BrokerClientMultiThreadTests {
                     LOGGER.error(ex.getLocalizedMessage(), ex);
                     return 0;
                 })
-                .completeOnTimeout(0,50, TimeUnit.SECONDS);
+                .completeOnTimeout(0, 50, TimeUnit.SECONDS);
 
             return future;
         }
@@ -65,7 +65,7 @@ public class BrokerClientMultiThreadTests {
         }
 
         public Integer run() {
-            IntStream.rangeClosed(1,5)
+            IntStream.rangeClosed(1, 5)
                 .forEach(x -> defaultBrokerClient.produce(EVENT, ""));
             return 1;
         }

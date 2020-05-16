@@ -14,7 +14,7 @@ public class BrokerClientTests {
     private BrokerClient defaultBrokerClient;
 
     @BeforeEach
-    public void setUp(){
+    public void setUp() {
         defaultConfig = new BrokerClientConfig();
         defaultBrokerClient = new BrokerClient(defaultConfig);
     }
