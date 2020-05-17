@@ -31,6 +31,8 @@ public class BrokerClientMultiThreadTests {
             .collect(toList());
 
         then(results.stream().count()).isEqualTo(2);
+
+        //Check that the last commits is from Client 2 (The consumer)
     }
 
     private interface Client {
@@ -64,7 +66,6 @@ public class BrokerClientMultiThreadTests {
         public Client1() {
             defaultConfig = new BrokerClientConfig("config_ping.properties");
             defaultBrokerClient = new BrokerClient(defaultConfig);
-            defaultBrokerClient.connect();
         }
 
         public Integer run() {
@@ -98,7 +99,6 @@ public class BrokerClientMultiThreadTests {
         public Client2() {
             defaultConfig = new BrokerClientConfig("config_pong.properties");
             defaultBrokerClient = new BrokerClient(defaultConfig);
-            defaultBrokerClient.connect();
         }
 
         public Integer run() {

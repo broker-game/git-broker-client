@@ -55,6 +55,9 @@ public class BrokerClient {
 
         this.localRepository = new LocalDirectoryWrapper();
         this.gitWrapper = new GitClientWrapper();
+
+        //Connect
+        this.connect();
     }
 
     /**
@@ -74,17 +77,10 @@ public class BrokerClient {
         );
     }
 
-    /**
-     * Connect with repository
-     *
-     * @return result
-     */
-    public boolean connect() {
+    private void connect() {
 
         localRepository.createLocalRepository(this.node);
         gitWrapper.cloneRepository(localRepository.getLocalFS(), this.broker, this.application);
-
-        return true;
     }
 
     /**
@@ -133,24 +129,24 @@ public class BrokerClient {
 
                 var localDirectory = this.localRepository.getLocalFS();
                 var counter = Arrays.stream(localDirectory.list())
-                    .filter(y -> y.indexOf(".json")!=-1)
+                    .filter(y -> y.indexOf(".json") != -1)
                     .count();
 
                 //Wait
-                if(counter == 0) {
+                if (counter == 0) {
                     return x;
                 } else {
 
                     //Detect last checkpoints
                     var checkPointList = Arrays.stream(localDirectory.list())
-                        .filter(y -> y.indexOf("OK.json")!=-1)
+                        .filter(y -> y.indexOf("OK.json") != -1)
                         .sorted()
                         .collect(Collectors.toList());
 
-                    if(checkPointList.size() > 0) {
+                    if (checkPointList.size() > 0) {
                         var lastCheckpoint = checkPointList.get(checkPointList.size() - 1);
                         var counter2 = Arrays.stream(localDirectory.list())
-                            .filter(y -> y.indexOf(".json")!=-1)
+                            .filter(y -> y.indexOf(".json") != -1)
                             .sorted()
                             .dropWhile(z -> !z.equals(lastCheckpoint))
                             .map(BrokerFileParser::new)
@@ -158,7 +154,7 @@ public class BrokerClient {
                             .peek(System.out::println)
                             .count();
 
-                        if(counter2 > 0) {
+                        if (counter2 > 0) {
                             LOGGER.info("Processing events: {} from last checkpoint: {}", event, lastCheckpoint);
                             return null;
                         } else {
@@ -168,7 +164,7 @@ public class BrokerClient {
                     } else if (checkPointList.size() == 0) {
                         LOGGER.info("Processing events: {}", event);
                         Arrays.stream(localDirectory.list())
-                            .filter(y -> y.indexOf(".json")!=-1)
+                            .filter(y -> y.indexOf(".json") != -1)
                             //.peek(System.out::println)
                             .map(BrokerFileParser::new)
                             .filter(b -> b.getEvent().equals(event))
@@ -193,7 +189,7 @@ public class BrokerClient {
     }
 
     private Stream<Long> getInfiniteStream() {
-        return Stream.iterate(0l, i -> i + 1l);
+        return Stream.iterate(0L, i -> i + 1L);
     }
 
     @SneakyThrows
