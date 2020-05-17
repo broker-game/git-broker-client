@@ -5,4 +5,8 @@
     "https://checkstyle.org/dtds/suppressions_1_2.dtd">
 
 <suppressions>
+    <suppress checks="AbbreviationAsWordInName"
+              files=".*/BrokerClientMultiThreadTests.java|
+              |.*/BrokerClientTests.java" />
+    <suppress checks="MemberName" files=".*/BrokerClientMultiThreadTests.java" />
 </suppressions>
