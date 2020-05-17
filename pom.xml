@@ -6,7 +6,7 @@
 
   <groupId>com.github.brokergame</groupId>
   <artifactId>broker-client</artifactId>
-  <version>0.2.0-SNAPSHOT</version>
+  <version>0.3.0-SNAPSHOT</version>
 
   <name>broker-client</name>
 
@@ -16,9 +16,11 @@
       <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
       <lombok.version>1.18.10</lombok.version>
+      <slf4j-api.version>1.7.25</slf4j-api.version>
 
       <org.eclipse.jgit.version>5.7.0.202003110725-r</org.eclipse.jgit.version>
 
+      <logback-classic.version>1.2.3</logback-classic.version>
       <junit.jupiter.version>5.5.2</junit.jupiter.version>
       <assertj-core.version>3.13.2</assertj-core.version>
       <awaitility.version>3.0.0</awaitility.version>
@@ -34,6 +36,12 @@
       </dependency>
 
       <dependency>
+          <groupId>org.slf4j</groupId>
+          <artifactId>slf4j-api</artifactId>
+          <version>${slf4j-api.version}</version>
+      </dependency>
+
+      <dependency>
           <groupId>org.eclipse.jgit</groupId>
           <artifactId>org.eclipse.jgit</artifactId>
           <version>${org.eclipse.jgit.version}</version>
@@ -42,13 +50,8 @@
       <dependency>
           <groupId>ch.qos.logback</groupId>
           <artifactId>logback-classic</artifactId>
-          <version>1.2.3</version>
-      </dependency>
-
-      <dependency>
-          <groupId>com.google.errorprone</groupId>
-          <artifactId>error_prone_core</artifactId>
-          <version>2.3.4</version>
+          <version>${logback-classic.version}</version>
+          <scope>test</scope>
       </dependency>
 
       <dependency>
@@ -88,6 +91,12 @@
           <artifactId>awaitility</artifactId>
           <version>${awaitility.version}</version>
           <scope>test</scope>
+      </dependency>
+
+      <dependency>
+          <groupId>com.google.errorprone</groupId>
+          <artifactId>error_prone_core</artifactId>
+          <version>2.3.4</version>
       </dependency>
 
   </dependencies>
