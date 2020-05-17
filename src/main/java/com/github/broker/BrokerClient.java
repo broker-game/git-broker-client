@@ -10,13 +10,14 @@ import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Objects;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @Slf4j
 public class BrokerClient {
 
-    LocalRepository localRepository;
-    GitWrapper gitWrapper;
+    LocalDirectoryWrapper localRepository;
+    GitClientWrapper gitWrapper;
 
     //Branch
     private final String application;
@@ -52,8 +53,8 @@ public class BrokerClient {
         this.user = user;
         this.password = password;
 
-        this.localRepository = new LocalRepository();
-        this.gitWrapper = new GitWrapper();
+        this.localRepository = new LocalDirectoryWrapper();
+        this.gitWrapper = new GitClientWrapper();
     }
 
     /**
@@ -130,22 +131,60 @@ public class BrokerClient {
             })
             .map(x -> {
 
-                Arrays.stream(this.localRepository.getLocalFS().list())
-                    .filter(y -> y.indexOf(".json") != -1)
-                    //.peek(System.out::println)
-                    .map(BrokerFileParser::new)
-                    .filter(b -> b.getEvent().equals(event))
-                    .forEach(System.out::println);
+                var localDirectory = this.localRepository.getLocalFS();
+                var counter = Arrays.stream(localDirectory.list())
+                    .filter(y -> y.indexOf(".json")!=-1)
+                    .count();
 
-                if (x > 1) {
-                    return null;
+                //Wait
+                if(counter == 0) {
+                    return x;
+                } else {
+
+                    //Detect last checkpoints
+                    var checkPointList = Arrays.stream(localDirectory.list())
+                        .filter(y -> y.indexOf("OK.json")!=-1)
+                        .sorted()
+                        .collect(Collectors.toList());
+
+                    if(checkPointList.size() > 0) {
+                        var lastCheckpoint = checkPointList.get(checkPointList.size() - 1);
+                        var counter2 = Arrays.stream(localDirectory.list())
+                            .filter(y -> y.indexOf(".json")!=-1)
+                            .sorted()
+                            .dropWhile(z -> !z.equals(lastCheckpoint))
+                            .map(BrokerFileParser::new)
+                            .filter(b -> b.getEvent().equals(event))
+                            .peek(System.out::println)
+                            .count();
+
+                        if(counter2 > 0) {
+                            LOGGER.info("Processing events: {} from last checkpoint: {}", event, lastCheckpoint);
+                            return null;
+                        } else {
+                            LOGGER.info("Without new events for: {} from last checkpoint: {}", event, lastCheckpoint);
+                        }
+
+                    } else if (checkPointList.size() == 0) {
+                        LOGGER.info("Processing events: {}", event);
+                        Arrays.stream(localDirectory.list())
+                            .filter(y -> y.indexOf(".json")!=-1)
+                            //.peek(System.out::println)
+                            .map(BrokerFileParser::new)
+                            .filter(b -> b.getEvent().equals(event))
+                            .forEach(System.out::println);
+
+                        //Break stream
+                        return null;
+                    }
                 }
                 return x;
             })
-            .peek(System.out::println)
+            //.peek(System.out::println)
             .takeWhile(Objects::nonNull)
             .count();
 
+        //Write checkpoint
         final String fileName = this.getFilename("OK");
         gitWrapper.addFile(this.localRepository.getLocalFS(), fileName, "PROCESSED", fullName, email);
         gitWrapper.push(user, password);
@@ -153,8 +192,8 @@ public class BrokerClient {
         return new BrokerResponse();
     }
 
-    private Stream<Integer> getInfiniteStream() {
-        return Stream.iterate(0, i -> i + 1);
+    private Stream<Long> getInfiniteStream() {
+        return Stream.iterate(0l, i -> i + 1l);
     }
 
     @SneakyThrows
@@ -182,11 +221,11 @@ public class BrokerClient {
     }
 
     //Testing purposes
-    public void setLocalRepository(LocalRepository localRepository) {
+    public void setLocalRepository(LocalDirectoryWrapper localRepository) {
         this.localRepository = localRepository;
     }
 
-    public void setGitWrapper(GitWrapper gitWrapper) {
+    public void setGitWrapper(GitClientWrapper gitWrapper) {
         this.gitWrapper = gitWrapper;
     }
 }

@@ -3,7 +3,7 @@ package com.github.broker;
 import java.io.File;
 import java.io.IOException;
 
-public class LocalRepository {
+public class LocalDirectoryWrapper {
 
     //Local File System
     private File localFS;

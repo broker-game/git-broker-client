@@ -26,7 +26,7 @@ import java.nio.file.Files;
 import java.util.stream.StreamSupport;
 
 @Slf4j
-public class GitWrapper {
+public class GitClientWrapper {
 
     //Git repository
     private Git git;
@@ -73,9 +73,10 @@ public class GitWrapper {
             InvalidRemoteException |
             TransportException |
             RefNotFoundException |
-            NoHeadException |
-            RefNotAdvertisedException e) {
-
+            NoHeadException e) {
+            LOGGER.warn(e.getLocalizedMessage());
+        }catch (RefNotAdvertisedException e) {
+            LOGGER.info("Waiting for Event in : {}", branch);
             LOGGER.warn(e.getLocalizedMessage());
         } catch (GitAPIException e) {
             LOGGER.warn(e.getLocalizedMessage());

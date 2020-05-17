@@ -68,10 +68,10 @@ public class BrokerClientConfig {
         this.password =     properties.getProperty("PASSWORD");
     }
 
-    private static String propFileName = "config.properties";
+    private static String DEFAULT_BROKER_CLIENT_CONFIG_FILE = "config.properties";
 
     public BrokerClientConfig() {
-        this(propFileName);
+        this(DEFAULT_BROKER_CLIENT_CONFIG_FILE);
     }
 
     private Properties loadConfigurationFromProperties(String propFileName) {

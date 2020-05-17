@@ -7,10 +7,11 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 
 import static org.assertj.core.api.BDDAssertions.then;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.when;
+import static org.mockito.MockitoAnnotations.initMocks;
 
 @Slf4j
 public class BrokerClientTests2 {
@@ -18,16 +19,16 @@ public class BrokerClientTests2 {
     private BrokerClientConfig defaultConfig;
 
     @Mock
-    private LocalRepository mockLocalRepository;
+    private LocalDirectoryWrapper mockLocalRepository;
 
     @Mock
-    private GitWrapper mockGitWrapper;
+    private GitClientWrapper mockGitWrapper;
 
     private BrokerClient defaultBrokerClient;
 
     @BeforeEach
     public void setUp() {
-        MockitoAnnotations.initMocks(this);
+        initMocks(this);
 
         defaultConfig = new BrokerClientConfig();
         defaultBrokerClient = new BrokerClient(defaultConfig);
@@ -81,6 +82,16 @@ public class BrokerClientTests2 {
 
         doNothing().when(mockLocalRepository).createLocalRepository(ArgumentMatchers.anyString());
         doNothing().when(mockGitWrapper).cloneRepository(ArgumentMatchers.any(), ArgumentMatchers.anyString(), ArgumentMatchers.anyString());
+        doNothing().when(mockGitWrapper).upgradeRepository(ArgumentMatchers.anyString());
+
+        String fileArray[] = {
+            "1589573422620_PING_PING.json",
+            "1589573437533_PING_PING.json",
+            "1589582622634_PING-NODE_OK.json"
+        };
+        when(mockLocalRepository.getLocalFS().list()).thenReturn(fileArray);
+        doNothing().when(mockGitWrapper).addFile(ArgumentMatchers.any(), ArgumentMatchers.anyString(), ArgumentMatchers.anyString(), ArgumentMatchers.anyString(), ArgumentMatchers.anyString());
+        doNothing().when(mockGitWrapper).push(ArgumentMatchers.anyString(), ArgumentMatchers.anyString());
 
         defaultBrokerClient.connect();
         final String EVENT = "PING";
