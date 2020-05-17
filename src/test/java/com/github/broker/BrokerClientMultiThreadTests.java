@@ -2,6 +2,7 @@ package com.github.broker;
 
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,6 +18,7 @@ import static org.assertj.core.api.BDDAssertions.then;
 @Slf4j
 public class BrokerClientMultiThreadTests {
 
+    @Disabled
     @Test
     public void given_Client_when_produceAndConsumeInParallelForEvent_then_Ok() {
 

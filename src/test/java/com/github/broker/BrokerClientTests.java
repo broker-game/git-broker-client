@@ -3,6 +3,7 @@ package com.github.broker;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.BDDAssertions.then;
@@ -36,6 +37,7 @@ public class BrokerClientTests {
         private final String value = "OK";
     }
 
+    @Disabled
     @Test
     public void given_Client_when_produceEvent_then_Ok() {
 
@@ -47,6 +49,7 @@ public class BrokerClientTests {
         then(defaultBrokerClient.produce(EVENT, MESSAGE)).isEqualTo(true);
     }
 
+    @Disabled
     @Test
     public void given_Client_when_consumeForEvent_then_Ok() {
 
