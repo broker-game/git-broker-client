@@ -25,14 +25,6 @@ public class BrokerClientTests {
         defaultBrokerClient.close();
     }
 
-    @Test
-    public void given_Client_when_connectWithBroker_then_Ok() {
-
-        var result =  defaultBrokerClient.connect();
-
-        then(result).isEqualTo(true);
-    }
-
     private static class Message {
         private final String value = "OK";
     }
@@ -40,8 +32,6 @@ public class BrokerClientTests {
     @Disabled
     @Test
     public void given_Client_when_produceEvent_then_Ok() {
-
-        defaultBrokerClient.connect();
 
         final String EVENT = "PING";
         final Message MESSAGE = new Message();
@@ -53,7 +43,6 @@ public class BrokerClientTests {
     @Test
     public void given_Client_when_consumeForEvent_then_Ok() {
 
-        defaultBrokerClient.connect();
         final String EVENT = "PING";
         final int poolingPeriod = 1;
 

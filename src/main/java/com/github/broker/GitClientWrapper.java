@@ -75,7 +75,7 @@ public class GitClientWrapper {
             RefNotFoundException |
             NoHeadException e) {
             LOGGER.warn(e.getLocalizedMessage());
-        }catch (RefNotAdvertisedException e) {
+        } catch (RefNotAdvertisedException e) {
             LOGGER.info("Waiting for Event in : {}", branch);
             LOGGER.warn(e.getLocalizedMessage());
         } catch (GitAPIException e) {

@@ -43,17 +43,6 @@ public class BrokerClientTests2 {
         defaultBrokerClient.close();
     }
 
-    @Test
-    public void given_Client_when_connectWithBroker_then_Ok() {
-
-        doNothing().when(mockLocalRepository).createLocalRepository(ArgumentMatchers.anyString());
-        doNothing().when(mockGitWrapper).cloneRepository(ArgumentMatchers.any(), ArgumentMatchers.anyString(), ArgumentMatchers.anyString());
-
-        var result =  defaultBrokerClient.connect();
-
-        then(result).isEqualTo(true);
-    }
-
     private static class Message {
         private final String value = "OK";
     }
@@ -67,8 +56,6 @@ public class BrokerClientTests2 {
         doNothing().when(mockGitWrapper).upgradeRepository(ArgumentMatchers.anyString());
         doNothing().when(mockGitWrapper).addFile(ArgumentMatchers.any(), ArgumentMatchers.anyString(), ArgumentMatchers.anyString(), ArgumentMatchers.anyString(), ArgumentMatchers.anyString());
         doNothing().when(mockGitWrapper).push(ArgumentMatchers.anyString(), ArgumentMatchers.anyString());
-
-        defaultBrokerClient.connect();
 
         final String EVENT = "PING";
         final Message MESSAGE = new Message();
@@ -93,7 +80,6 @@ public class BrokerClientTests2 {
         doNothing().when(mockGitWrapper).addFile(ArgumentMatchers.any(), ArgumentMatchers.anyString(), ArgumentMatchers.anyString(), ArgumentMatchers.anyString(), ArgumentMatchers.anyString());
         doNothing().when(mockGitWrapper).push(ArgumentMatchers.anyString(), ArgumentMatchers.anyString());
 
-        defaultBrokerClient.connect();
         final String EVENT = "PING";
         final int poolingPeriod = 1;
 
