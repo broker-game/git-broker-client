@@ -1,8 +1,11 @@
 package com.github.broker;
 
+import lombok.extern.slf4j.Slf4j;
+
 import java.io.File;
 import java.io.IOException;
 
+@Slf4j
 public class LocalDirectoryWrapper {
 
     //Local File System
@@ -19,7 +22,6 @@ public class LocalDirectoryWrapper {
         } catch (IOException e) {
             throw new RuntimeException(e.getLocalizedMessage(), e);
         }
-
     }
 
     private File prepareFolderForGit(String node) throws IOException {
@@ -27,7 +29,7 @@ public class LocalDirectoryWrapper {
         if (!localPath.delete()) {
             throw new IOException("Could not delete temporary file " + localPath);
         }
-        System.out.println(localPath.getAbsolutePath());
+        LOGGER.debug("Creating local directory in: {}", localPath.getAbsolutePath());
         return localPath;
     }
 

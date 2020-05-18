@@ -10,8 +10,9 @@ import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Objects;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import static java.util.stream.Collectors.toList;
 
 @Slf4j
 public class BrokerClient {
@@ -45,6 +46,9 @@ public class BrokerClient {
      */
     public BrokerClient(String broker, String application, String node,
                         String fullName, String email, String user, String password) {
+
+        LOGGER.info("Creating an instance of BrokerClient");
+
         this.broker = broker;
         this.application = application;
         this.node = node;
@@ -93,6 +97,9 @@ public class BrokerClient {
     public boolean produce(String event, Object message) {
 
         final String fileName = this.getFilename(event);
+
+        LOGGER.info("Producing event: {}", fileName);
+
         gitWrapper.upgradeRepository(this.application);
         gitWrapper.addFile(this.localRepository.getLocalFS(), fileName, message.toString(), this.fullName, this.email);
         gitWrapper.push(user, password);
@@ -101,9 +108,7 @@ public class BrokerClient {
     }
 
     private String getFilename(String event) {
-        final String fileName = getEpoch() + "_" + this.node + "_" + event + ".json";
-        LOGGER.info(fileName);
-        return fileName;
+        return getEpoch() + "_" + this.node + "_" + event + ".json";
     }
 
     private long getEpoch() {
@@ -141,21 +146,24 @@ public class BrokerClient {
                     var checkPointList = Arrays.stream(localDirectory.list())
                         .filter(y -> y.indexOf("OK.json") != -1)
                         .sorted()
-                        .collect(Collectors.toList());
+                        .collect(toList());
 
                     if (checkPointList.size() > 0) {
                         var lastCheckpoint = checkPointList.get(checkPointList.size() - 1);
-                        var counter2 = Arrays.stream(localDirectory.list())
+                        var list = Arrays.stream(localDirectory.list())
                             .filter(y -> y.indexOf(".json") != -1)
                             .sorted()
                             .dropWhile(z -> !z.equals(lastCheckpoint))
                             .map(BrokerFileParser::new)
                             .filter(b -> b.getEvent().equals(event))
-                            .peek(System.out::println)
-                            .count();
+                            //.peek(System.out::println)
+                            .collect(toList());
 
-                        if (counter2 > 0) {
+                        if (list.size() > 0) {
                             LOGGER.info("Processing events: {} from last checkpoint: {}", event, lastCheckpoint);
+                            list.stream()
+                                .forEach(file -> LOGGER.info(file.toString()));
+
                             return null;
                         } else {
                             LOGGER.info("Without new events for: {} from last checkpoint: {}", event, lastCheckpoint);

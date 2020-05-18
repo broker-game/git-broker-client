@@ -76,6 +76,8 @@ public class BrokerClientConfig {
 
     private Properties loadConfigurationFromProperties(String propFileName) {
 
+        LOGGER.debug("Loading configuration from: {}", propFileName);
+
         Properties prop = new Properties();
         try (InputStream inputStream = getClass().getClassLoader().getResourceAsStream(propFileName)) {
 

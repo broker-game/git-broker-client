@@ -41,13 +41,13 @@ public class GitClientWrapper {
     public void cloneRepository(File file, String repository, String branch) {
 
         try {
+            LOGGER.debug("Cloning repository: {}", repository);
             git = Git.cloneRepository()
                 .setURI(repository)
                 .setDirectory(file)
-                //.setBranchesToClone(singleton("refs/heads/master"))
-                .setProgressMonitor(new SimpleProgressMonitor())
                 .call();
 
+            LOGGER.debug("Switching to branch: {}", branch);
             git.checkout()
                 .setCreateBranch(true)
                 .setName(branch)
@@ -66,7 +66,7 @@ public class GitClientWrapper {
     public void upgradeRepository(String branch) {
         try {
             git.fetch().setForceUpdate(true).setRemote("origin").call();
-            git.pull().setRemoteBranchName(branch).setProgressMonitor(new SimpleProgressMonitor()).call();
+            git.pull().setRemoteBranchName(branch).call();
         } catch (WrongRepositoryStateException |
             InvalidConfigurationException |
             CanceledException |
