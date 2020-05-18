@@ -33,7 +33,7 @@ public class BrokerClientTests {
     @Test
     public void given_Client_when_produceEvent_then_Ok() {
 
-        final String EVENT = "PING";
+        final String EVENT = "PING-EVENT";
         final Message MESSAGE = new Message();
 
         then(defaultBrokerClient.produce(EVENT, MESSAGE)).isEqualTo(true);
@@ -43,9 +43,10 @@ public class BrokerClientTests {
     @Test
     public void given_Client_when_consumeForEvent_then_Ok() {
 
-        final String EVENT = "PING";
+        final String EVENT = "PING-EVENT";
         final int poolingPeriod = 1;
 
+        defaultBrokerClient.produce(EVENT, new Message());
         BrokerResponse response = defaultBrokerClient.consume(EVENT, poolingPeriod);
         then(response).isNotNull();
     }

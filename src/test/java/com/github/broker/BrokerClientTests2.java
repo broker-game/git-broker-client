@@ -57,7 +57,7 @@ public class BrokerClientTests2 {
         doNothing().when(mockGitWrapper).addFile(ArgumentMatchers.any(), ArgumentMatchers.anyString(), ArgumentMatchers.anyString(), ArgumentMatchers.anyString(), ArgumentMatchers.anyString());
         doNothing().when(mockGitWrapper).push(ArgumentMatchers.anyString(), ArgumentMatchers.anyString());
 
-        final String EVENT = "PING";
+        final String EVENT = "PING-EVENT";
         final Message MESSAGE = new Message();
 
         then(defaultBrokerClient.produce(EVENT, MESSAGE)).isEqualTo(true);
