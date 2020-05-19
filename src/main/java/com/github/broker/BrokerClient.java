@@ -1,5 +1,6 @@
 package com.github.broker;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
@@ -32,6 +33,8 @@ public class BrokerClient {
     private final String password;
     private final String fullName;
     private final String email;
+
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     /**
      * Constructor
@@ -100,11 +103,18 @@ public class BrokerClient {
 
         LOGGER.info("Producing event: {}", fileName);
 
+        final String fileContent = getFileContent(message);
+
         gitWrapper.upgradeRepository(this.application);
-        gitWrapper.addFile(this.localRepository.getLocalFS(), fileName, message.toString(), this.fullName, this.email);
+        gitWrapper.addFile(this.localRepository.getLocalFS(), fileName, fileContent, this.fullName, this.email);
         gitWrapper.push(user, password);
 
         return true;
+    }
+
+    @SneakyThrows
+    private String getFileContent(Object message) {
+        return objectMapper.writeValueAsString(message);
     }
 
     private String getFilename(String event) {

@@ -1,5 +1,6 @@
 package com.github.broker;
 
+import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -25,6 +26,7 @@ public class BrokerClientTests {
         defaultBrokerClient.close();
     }
 
+    @Data
     private static class Message {
         private final String value = "OK";
     }
