@@ -139,6 +139,24 @@ public class BrokerClientMultiThreadTests {
 
 ```
 
+## Configuration
+
+You can declare the client in a Java class or use a PropertyFile.
+
+```
+brokerclient.broker=https://github.com/broker-game/broker-dev-environment
+brokerclient.application=PINGPONG
+brokerclient.node=PING-NODE
+brokerclient.fullname=Juan Antonio Breña Moral
+brokerclient.email=bren@juanantonio.info
+brokerclient.user=XXX
+brokerclient.password=YYY
+```
+
+**Note:** the client support configuration for multiple clients in the same file.
+Review the tests to learn the way.
+
+
 ## Dependency
 
 ```
