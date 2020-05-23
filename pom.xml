@@ -161,7 +161,7 @@
           <configuration>
               <configLocation>config/checkstyle/google_check.xml</configLocation>
               <suppressionsLocation>config/checkstyle/suppressions.xml</suppressionsLocation>
-              <encoding>UTF-8</encoding>
+              <encoding>${project.build.sourceEncoding}</encoding>
               <consoleOutput>true</consoleOutput>
               <violationSeverity>warning</violationSeverity>
               <failsOnError>true</failsOnError>
@@ -202,7 +202,7 @@
                 <configuration>
                     <configLocation>config/checkstyle/google_check.xml</configLocation>
                     <suppressionsLocation>config/checkstyle/suppressions.xml</suppressionsLocation>
-                    <encoding>UTF-8</encoding>
+                    <encoding>${project.build.sourceEncoding}</encoding>
                     <consoleOutput>true</consoleOutput>
                     <failsOnError>true</failsOnError>
                     <includeTestSourceDirectory>true</includeTestSourceDirectory>

@@ -26,6 +26,9 @@ public class BrokerClientTests2 {
 
     private BrokerClient defaultBrokerClient;
 
+    /**
+     * Setup
+     */
     @BeforeEach
     public void setUp() {
         initMocks(this);
@@ -51,10 +54,13 @@ public class BrokerClientTests2 {
     public void given_Client_when_produceEvent_then_Ok() {
 
         doNothing().when(mockLocalRepository).createLocalRepository(ArgumentMatchers.anyString());
-        doNothing().when(mockGitWrapper).cloneRepository(ArgumentMatchers.any(), ArgumentMatchers.anyString(), ArgumentMatchers.anyString());
+        doNothing().when(mockGitWrapper)
+            .cloneRepository(ArgumentMatchers.any(), ArgumentMatchers.anyString(), ArgumentMatchers.anyString());
 
         doNothing().when(mockGitWrapper).upgradeRepository(ArgumentMatchers.anyString());
-        doNothing().when(mockGitWrapper).addFile(ArgumentMatchers.any(), ArgumentMatchers.anyString(), ArgumentMatchers.anyString(), ArgumentMatchers.anyString(), ArgumentMatchers.anyString());
+        doNothing().when(mockGitWrapper).addFile(
+            ArgumentMatchers.any(), ArgumentMatchers.anyString(),
+            ArgumentMatchers.anyString(), ArgumentMatchers.anyString(), ArgumentMatchers.anyString());
         doNothing().when(mockGitWrapper).push(ArgumentMatchers.anyString(), ArgumentMatchers.anyString());
 
         final String EVENT = "PING-EVENT";
@@ -68,16 +74,19 @@ public class BrokerClientTests2 {
     public void given_Client_when_consumeForEvent_then_Ok() {
 
         doNothing().when(mockLocalRepository).createLocalRepository(ArgumentMatchers.anyString());
-        doNothing().when(mockGitWrapper).cloneRepository(ArgumentMatchers.any(), ArgumentMatchers.anyString(), ArgumentMatchers.anyString());
+        doNothing().when(mockGitWrapper).cloneRepository(
+            ArgumentMatchers.any(), ArgumentMatchers.anyString(), ArgumentMatchers.anyString());
         doNothing().when(mockGitWrapper).upgradeRepository(ArgumentMatchers.anyString());
 
-        String fileArray[] = {
+        String[] fileArray = {
             "1589573422620_PING_PING.json",
             "1589573437533_PING_PING.json",
             "1589582622634_PING-NODE_OK.json"
         };
         when(mockLocalRepository.getLocalFS().list()).thenReturn(fileArray);
-        doNothing().when(mockGitWrapper).addFile(ArgumentMatchers.any(), ArgumentMatchers.anyString(), ArgumentMatchers.anyString(), ArgumentMatchers.anyString(), ArgumentMatchers.anyString());
+        doNothing().when(mockGitWrapper).addFile(
+            ArgumentMatchers.any(), ArgumentMatchers.anyString(), ArgumentMatchers.anyString(),
+            ArgumentMatchers.anyString(), ArgumentMatchers.anyString());
         doNothing().when(mockGitWrapper).push(ArgumentMatchers.anyString(), ArgumentMatchers.anyString());
 
         final String EVENT = "PING";

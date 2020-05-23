@@ -7,6 +7,9 @@
 <suppressions>
     <suppress checks="AbbreviationAsWordInName"
               files=".*/BrokerClientMultiThreadTests.java|
-              |.*/BrokerClientTests.java" />
-    <suppress checks="MemberName" files=".*/BrokerClientMultiThreadTests.java" />
+              |.*/BrokerClientTests.java|
+              |.*/BrokerClientConfig.java|" />
+    <suppress checks="MemberName"
+              files=".*/BrokerClientMultiThreadTests.java|
+              |.*/BrokerClientConfig.java|" />
 </suppressions>
