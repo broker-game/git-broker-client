@@ -43,7 +43,7 @@ class BrokerClientConfigTests {
             "PING-NODE",
             "Juan Antonio Breña Moral",
             "bren@juanantonio.info",
-            "XXX" ,
+            "XXX",
             "YYY");
 
         then(config.getBroker()).isNotNull();

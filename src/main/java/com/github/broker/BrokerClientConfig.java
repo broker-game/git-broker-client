@@ -38,7 +38,7 @@ public class BrokerClientConfig {
     /**
      * Constructor
      *
-     * @param propFileName Property file name
+     * @param propFileName Property filename
      */
     public BrokerClientConfig(String propFileName) {
 
@@ -52,6 +52,12 @@ public class BrokerClientConfig {
         this.password =     properties.getProperty(getKeyPath(KEY_PASSWORD));
     }
 
+    /**
+     * Constructor
+     *
+     * @param propFileName Property filename
+     * @param instance Instance
+     */
     public BrokerClientConfig(String propFileName, String instance) {
 
         var properties = loadConfigurationFromProperties(propFileName);
