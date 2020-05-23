@@ -2,7 +2,7 @@
 
 A Slow Event Streaming client for Git
 
-[![Build Status](https://travis-ci.org/ev3dev-lang-java/broker-client.svg?branch=master)](https://travis-ci.org/ev3dev-lang-java/broker-client)
+![Java CI](https://github.com/broker-game/broker-client/workflows/Java%20CI/badge.svg?branch=master)
 
 ## Motivation
 
