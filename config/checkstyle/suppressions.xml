@@ -8,8 +8,8 @@
     <suppress checks="AbbreviationAsWordInName"
               files=".*/BrokerClientMultiThreadTests.java|
               |.*/BrokerClientTests.java|
-              |.*/BrokerClientConfig.java|" />
+              |.*/BrokerClientConfig.java" />
     <suppress checks="MemberName"
               files=".*/BrokerClientMultiThreadTests.java|
-              |.*/BrokerClientConfig.java|" />
+              |.*/BrokerClientConfig.java" />
 </suppressions>
