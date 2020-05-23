@@ -1,5 +1,7 @@
 package com.github.broker;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -114,6 +116,7 @@ public class BrokerClient {
 
     @SneakyThrows
     private String getFileContent(Object message) {
+        objectMapper.setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY);
         return objectMapper.writeValueAsString(message);
     }
 

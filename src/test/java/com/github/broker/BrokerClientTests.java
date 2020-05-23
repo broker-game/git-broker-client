@@ -17,7 +17,7 @@ public class BrokerClientTests {
 
     @BeforeEach
     public void setUp() {
-        defaultConfig = new BrokerClientConfig();
+        defaultConfig = new BrokerClientConfig("brokerclient.e2e.properties");
         defaultBrokerClient = new BrokerClient(defaultConfig);
     }
 

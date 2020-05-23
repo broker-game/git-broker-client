@@ -1,5 +1,6 @@
 package com.github.broker;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 
@@ -9,47 +10,30 @@ import java.io.InputStream;
 import java.util.Objects;
 import java.util.Properties;
 
-/**
- *
- */
 @Slf4j
 @Data
+@AllArgsConstructor
 public class BrokerClientConfig {
 
-    //Node
-    private final String node;
+    private static String DEFAULT_BROKER_CLIENT_CONFIG_FILE = "brokerclient.properties";
 
-    //Credentials
+    private static final String PREFIX = "brokerclient";
+    private static final String DOT = ".";
+    private final String KEY_NODE = "node";
+    private final String KEY_BROKER = "broker";
+    private final String KEY_USER = "user";
+    private final String KEY_PASSWORD = "password";
+    private final String KEY_FULLNAME = "fullname";
+    private final String KEY_EMAIL = "email";
+    private final String KEY_APPLICATION = "application";
+
     private final String broker;
-    private final String user;
-    private final String password;
+    private final String application;
+    private final String node;
     private final String fullName;
     private final String email;
-
-    //Branch
-    final String application;
-
-    /**
-     * Constructor
-     *
-     * @param broker broker
-     * @param application application
-     * @param node node
-     * @param fullName fullName
-     * @param email email
-     * @param user user
-     * @param password password
-     */
-    public BrokerClientConfig(String broker, String application, String node,
-                              String fullName, String email, String user, String password) {
-        this.broker = broker;
-        this.node = node;
-        this.fullName = fullName;
-        this.email = email;
-        this.user = user;
-        this.password = password;
-        this.application = application;
-    }
+    private final String user;
+    private final String password;
 
     /**
      * Constructor
@@ -59,19 +43,37 @@ public class BrokerClientConfig {
     public BrokerClientConfig(String propFileName) {
 
         var properties = loadConfigurationFromProperties(propFileName);
-        this.broker =       properties.getProperty("BROKER");
-        this.application =  properties.getProperty("APPLICATION");
-        this.node =         properties.getProperty("NODE");
-        this.fullName =     properties.getProperty("FULLNAME");
-        this.email =        properties.getProperty("EMAIL");
-        this.user =         properties.getProperty("USER");
-        this.password =     properties.getProperty("PASSWORD");
+        this.broker =       properties.getProperty(getKeyPath(KEY_BROKER));
+        this.application =  properties.getProperty(getKeyPath(KEY_APPLICATION));
+        this.node =         properties.getProperty(getKeyPath(KEY_NODE));
+        this.fullName =     properties.getProperty(getKeyPath(KEY_FULLNAME));
+        this.email =        properties.getProperty(getKeyPath(KEY_EMAIL));
+        this.user =         properties.getProperty(getKeyPath(KEY_USER));
+        this.password =     properties.getProperty(getKeyPath(KEY_PASSWORD));
     }
 
-    private static String DEFAULT_BROKER_CLIENT_CONFIG_FILE = "config.properties";
+    public BrokerClientConfig(String propFileName, String instance) {
+
+        var properties = loadConfigurationFromProperties(propFileName);
+        this.broker =       properties.getProperty(getKeyPath(instance, KEY_BROKER));
+        this.application =  properties.getProperty(getKeyPath(instance, KEY_APPLICATION));
+        this.node =         properties.getProperty(getKeyPath(instance, KEY_NODE));
+        this.fullName =     properties.getProperty(getKeyPath(instance, KEY_FULLNAME));
+        this.email =        properties.getProperty(getKeyPath(instance, KEY_EMAIL));
+        this.user =         properties.getProperty(getKeyPath(instance, KEY_USER));
+        this.password =     properties.getProperty(getKeyPath(instance, KEY_PASSWORD));
+    }
 
     public BrokerClientConfig() {
         this(DEFAULT_BROKER_CLIENT_CONFIG_FILE);
+    }
+
+    private String getKeyPath(String key) {
+        return PREFIX + DOT + key;
+    }
+
+    private String getKeyPath(String instance, String key) {
+        return PREFIX + DOT + instance + DOT + key;
     }
 
     private Properties loadConfigurationFromProperties(String propFileName) {
