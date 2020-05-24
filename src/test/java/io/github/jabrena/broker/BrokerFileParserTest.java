@@ -1,4 +1,4 @@
-package com.github.broker;
+package io.github.jabrena.broker;
 
 import org.junit.jupiter.api.Test;
 
