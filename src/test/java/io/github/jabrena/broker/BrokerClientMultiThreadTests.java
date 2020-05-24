@@ -1,4 +1,4 @@
-package com.github.broker;
+package io.github.jabrena.broker;
 
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
