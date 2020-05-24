@@ -156,6 +156,27 @@ brokerclient.password=YYY
 **Note:** the client support configuration for multiple clients in the same file.
 Review the tests to learn the way.
 
+## JDK Requeriments in EV3
+
+Current default JVM has an issue with `CA Certificates` and it is necessary to
+install a complete JDK. Create a ssh session with your EV3 Brick and execute
+the following steps:
+
+```
+wget https://ci.adoptopenjdk.net/view/ev3dev/job/eljbuild/job/stretch-14/lastSuccessfulBuild/artifact/build/jdk-ev3.tar.gz
+sudo tar -zxvf jdk-ev3.tar.gz -C /opt
+sudo mv /opt/jdk/ /opt/jdk-14
+sudo update-alternatives --install /usr/bin/java java /opt/jdk-14/bin/java 2014
+java -version
+```
+
+You should see:
+
+```
+openjdk version "14" 2020-03-17
+OpenJDK Runtime Environment (build 14+36-ev3-unreleased)
+OpenJDK Client VM (build 14+36-ev3-unreleased, mixed mode, sharing)
+```
 
 ## Dependency
 
