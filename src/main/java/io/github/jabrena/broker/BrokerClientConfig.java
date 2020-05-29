@@ -8,6 +8,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Properties;
 
 @Slf4j
@@ -18,6 +19,7 @@ public class BrokerClientConfig {
     private static String DEFAULT_BROKER_CLIENT_CONFIG_FILE = "brokerclient.properties";
 
     private static final String PREFIX = "brokerclient";
+    private static final String GENERAL_INSTANCE = "general";
     private static final String DOT = ".";
     private final String KEY_NODE = "node";
     private final String KEY_BROKER = "broker";
@@ -43,13 +45,13 @@ public class BrokerClientConfig {
     public BrokerClientConfig(String propFileName) {
 
         var properties = loadConfigurationFromProperties(propFileName);
-        this.broker =       properties.getProperty(getKeyPath(KEY_BROKER));
-        this.application =  properties.getProperty(getKeyPath(KEY_APPLICATION));
-        this.node =         properties.getProperty(getKeyPath(KEY_NODE));
-        this.fullName =     properties.getProperty(getKeyPath(KEY_FULLNAME));
-        this.email =        properties.getProperty(getKeyPath(KEY_EMAIL));
-        this.user =         properties.getProperty(getKeyPath(KEY_USER));
-        this.password =     properties.getProperty(getKeyPath(KEY_PASSWORD));
+        this.broker =       getKeyPath(properties, KEY_BROKER);
+        this.application =  getKeyPath(properties, KEY_APPLICATION);
+        this.node =         getKeyPath(properties, KEY_NODE);
+        this.fullName =     getKeyPath(properties, KEY_FULLNAME);
+        this.email =        getKeyPath(properties, KEY_EMAIL);
+        this.user =         getKeyPath(properties, KEY_USER);
+        this.password =     getKeyPath(properties, KEY_PASSWORD);
     }
 
     /**
@@ -61,25 +63,35 @@ public class BrokerClientConfig {
     public BrokerClientConfig(String propFileName, String instance) {
 
         var properties = loadConfigurationFromProperties(propFileName);
-        this.broker =       properties.getProperty(getKeyPath(instance, KEY_BROKER));
-        this.application =  properties.getProperty(getKeyPath(instance, KEY_APPLICATION));
-        this.node =         properties.getProperty(getKeyPath(instance, KEY_NODE));
-        this.fullName =     properties.getProperty(getKeyPath(instance, KEY_FULLNAME));
-        this.email =        properties.getProperty(getKeyPath(instance, KEY_EMAIL));
-        this.user =         properties.getProperty(getKeyPath(instance, KEY_USER));
-        this.password =     properties.getProperty(getKeyPath(instance, KEY_PASSWORD));
+        this.broker =       getKeyPathWithInstance(properties, instance, KEY_BROKER);
+        this.application =  getKeyPathWithInstance(properties, instance, KEY_APPLICATION);
+        this.node =         getKeyPathWithInstance(properties, instance, KEY_NODE);
+        this.fullName =     getKeyPathWithInstance(properties, instance, KEY_FULLNAME);
+        this.email =        getKeyPathWithInstance(properties, instance, KEY_EMAIL);
+        this.user =         getKeyPathWithInstance(properties, instance, KEY_USER);
+        this.password =     getKeyPathWithInstance(properties, instance, KEY_PASSWORD);
     }
 
     public BrokerClientConfig() {
         this(DEFAULT_BROKER_CLIENT_CONFIG_FILE);
     }
 
-    private String getKeyPath(String key) {
-        return PREFIX + DOT + key;
+    private String getKeyPath(Properties properties, String key) {
+        return getPropertyValue(properties,PREFIX + DOT + key)
+            .orElseThrow(() -> new RuntimeException("Not found key: " + key));
     }
 
-    private String getKeyPath(String instance, String key) {
-        return PREFIX + DOT + instance + DOT + key;
+    private String getKeyPathWithInstance(Properties properties, String instance, String key) {
+        var value = getPropertyValue(properties,PREFIX + DOT + instance + DOT + key);
+        if (value.isPresent()) {
+            return value.get();
+        }
+        return getPropertyValue(properties,PREFIX + DOT + GENERAL_INSTANCE + DOT + key)
+            .orElseThrow(() -> new RuntimeException("Not found key: " + key));
+    }
+
+    private Optional<String> getPropertyValue(Properties properties, String key) {
+        return Optional.ofNullable(properties.getProperty(key));
     }
 
     private Properties loadConfigurationFromProperties(String propFileName) {

@@ -3,6 +3,7 @@ package io.github.jabrena.broker;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.BDDAssertions.then;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class BrokerClientConfigTests {
 
@@ -56,9 +57,9 @@ class BrokerClientConfigTests {
     }
 
     @Test
-    public void given_Object_when_useConstructor_and_multipleConfigurations_then_loadProperties() {
+    public void given_Object_when_useConstructor_and_multipleConfigurations_and_nonVerboseProperties_then_loadProperties() {
 
-        BrokerClientConfig config = new BrokerClientConfig("application.properties", "one");
+        BrokerClientConfig config = new BrokerClientConfig("application2.properties", "one");
 
         then(config.getBroker()).isNotNull();
         then(config.getApplication()).isNotNull();
@@ -68,7 +69,7 @@ class BrokerClientConfigTests {
         then(config.getUser()).isNotNull();
         then(config.getPassword()).isNotNull();
 
-        BrokerClientConfig config2 = new BrokerClientConfig("application.properties", "two");
+        BrokerClientConfig config2 = new BrokerClientConfig("application2.properties", "two");
 
         then(config2.getBroker()).isNotNull();
         then(config2.getApplication()).isNotNull();
@@ -77,6 +78,19 @@ class BrokerClientConfigTests {
         then(config2.getEmail()).isNotNull();
         then(config2.getUser()).isNotNull();
         then(config2.getPassword()).isNotNull();
+    }
+
+    @Test
+    public void given_Object_when_useConstructor_and_multipleConfigurations_and_nonVerboseProperties_and_missingFields_then_loadProperties() {
+
+        Exception exception = assertThrows(RuntimeException.class, () -> {
+            new BrokerClientConfig("application3.properties", "one");
+        });
+
+        String expectedMessage = "Not found key: user";
+        String actualMessage = exception.getMessage();
+
+        then(actualMessage.contains(expectedMessage));
     }
 
 }
