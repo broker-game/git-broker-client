@@ -56,9 +56,9 @@ class BrokerClientConfigTests {
     }
 
     @Test
-    public void given_Object_when_useConstructor_and_multipleConfigurations_then_loadProperties() {
+    public void given_Object_when_useConstructor_and_multipleConfigurations_and_nonVerboseProperties_then_loadProperties() {
 
-        BrokerClientConfig config = new BrokerClientConfig("application.properties", "one");
+        BrokerClientConfig config = new BrokerClientConfig("application2.properties", "one");
 
         then(config.getBroker()).isNotNull();
         then(config.getApplication()).isNotNull();
@@ -68,7 +68,7 @@ class BrokerClientConfigTests {
         then(config.getUser()).isNotNull();
         then(config.getPassword()).isNotNull();
 
-        BrokerClientConfig config2 = new BrokerClientConfig("application.properties", "two");
+        BrokerClientConfig config2 = new BrokerClientConfig("application2.properties", "two");
 
         then(config2.getBroker()).isNotNull();
         then(config2.getApplication()).isNotNull();
