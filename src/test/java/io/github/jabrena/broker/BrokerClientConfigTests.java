@@ -3,6 +3,7 @@ package io.github.jabrena.broker;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.BDDAssertions.then;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class BrokerClientConfigTests {
 
@@ -77,6 +78,19 @@ class BrokerClientConfigTests {
         then(config2.getEmail()).isNotNull();
         then(config2.getUser()).isNotNull();
         then(config2.getPassword()).isNotNull();
+    }
+
+    @Test
+    public void given_Object_when_useConstructor_and_multipleConfigurations_and_nonVerboseProperties_and_missingFields_then_loadProperties() {
+
+        Exception exception = assertThrows(RuntimeException.class, () -> {
+            new BrokerClientConfig("application3.properties", "one");
+        });
+
+        String expectedMessage = "Not found key: user";
+        String actualMessage = exception.getMessage();
+
+        then(actualMessage.contains(expectedMessage));
     }
 
 }
