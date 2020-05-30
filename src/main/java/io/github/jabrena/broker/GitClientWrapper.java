@@ -74,12 +74,12 @@ public class GitClientWrapper {
             TransportException |
             RefNotFoundException |
             NoHeadException e) {
-            LOGGER.warn(e.getLocalizedMessage());
+            LOGGER.warn(e.getLocalizedMessage(), e);
         } catch (RefNotAdvertisedException e) {
             LOGGER.info("Waiting for Event in : {}", branch);
-            LOGGER.warn(e.getLocalizedMessage());
+            LOGGER.trace(e.getLocalizedMessage(), e);
         } catch (GitAPIException e) {
-            LOGGER.warn(e.getLocalizedMessage());
+            LOGGER.warn(e.getLocalizedMessage(), e);
         }
     }
 
