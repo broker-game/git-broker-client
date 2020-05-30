@@ -137,7 +137,7 @@ public class BrokerClient {
      */
     public BrokerResponse consume(String event, int poolingPeriod) {
 
-        getInfiniteStream()
+        var result = getInfiniteStream()
             .map(x -> {
                 sleep(poolingPeriod);
                 gitWrapper.upgradeRepository(this.application);
@@ -169,7 +169,7 @@ public class BrokerClient {
                             .dropWhile(z -> !z.equals(lastCheckpoint))
                             .map(BrokerFileParser::new)
                             .filter(b -> b.getEvent().equals(event))
-                            //.peek(System.out::println)
+                            .peek(System.out::println)
                             .collect(toList());
 
                         if (list.size() > 0) {
@@ -177,22 +177,30 @@ public class BrokerClient {
                             list.stream()
                                 .forEach(file -> LOGGER.info(file.toString()));
 
+                            writeCheckpoint();
+
                             return null;
                         } else {
                             LOGGER.info("Without new events for: {} from last checkpoint: {}", event, lastCheckpoint);
                         }
 
                     } else if (checkPointList.size() == 0) {
-                        LOGGER.info("Processing events: {}", event);
-                        Arrays.stream(localDirectory.list())
+                        var count = Arrays.stream(localDirectory.list())
                             .filter(y -> y.indexOf(".json") != -1)
-                            //.peek(System.out::println)
                             .map(BrokerFileParser::new)
                             .filter(b -> b.getEvent().equals(event))
-                            .forEach(System.out::println);
+                            .peek(System.out::println)
+                            .count();
 
-                        //Break stream
-                        return null;
+                        if (count > 0) {
+                            LOGGER.info("Processing events: {}", event);
+
+                            writeCheckpoint();
+
+                            //Break stream
+                            return null;
+                        }
+                        LOGGER.info("Without new events for: {} from last checkpoint: {}", event);
                     }
                 }
                 return x;
@@ -201,12 +209,15 @@ public class BrokerClient {
             .takeWhile(Objects::nonNull)
             .count();
 
+        return new BrokerResponse();
+    }
+
+    private void writeCheckpoint() {
+
         //Write checkpoint
         final String fileName = this.getFilename("OK");
         gitWrapper.addFile(this.localRepository.getLocalFS(), fileName, "PROCESSED", fullName, email);
         gitWrapper.push(user, password);
-
-        return new BrokerResponse();
     }
 
     private Stream<Long> getInfiniteStream() {
