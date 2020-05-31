@@ -77,16 +77,16 @@ public class BrokerClientConfig {
     }
 
     private String getKeyPath(Properties properties, String key) {
-        return getPropertyValue(properties,PREFIX + DOT + key)
+        return getPropertyValue(properties, PREFIX + DOT + key)
             .orElseThrow(() -> new RuntimeException("Not found key: " + key));
     }
 
     private String getKeyPathWithInstance(Properties properties, String instance, String key) {
-        var value = getPropertyValue(properties,PREFIX + DOT + instance + DOT + key);
+        var value = getPropertyValue(properties, PREFIX + DOT + instance + DOT + key);
         if (value.isPresent()) {
             return value.get();
         }
-        return getPropertyValue(properties,PREFIX + DOT + GENERAL_INSTANCE + DOT + key)
+        return getPropertyValue(properties, PREFIX + DOT + GENERAL_INSTANCE + DOT + key)
             .orElseThrow(() -> new RuntimeException("Not found key: " + key));
     }
 
