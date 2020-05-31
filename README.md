@@ -41,16 +41,20 @@ which offer `free` git accounts to store the code.
 - Consume Events
 - Initial partition support
 
+## Limitations:
+
+- It is not possible to create a Node in High Availability
+
 ## Examples
 
 ``` java
 @Slf4j
-public class BrokerClientMultiThreadTests {
+public class PingPongDemoTest {
 
     @Test
-    public void given_Client_when_produceAndConsumeInParallelForEvent_then_Ok() {
+    public void given_PingPongGame_when_execute_then_Ok() {
 
-        var futureRequests = List.of(new Client1(), new Client2()).stream()
+        var futureRequests = List.of(new Game(), new Ping(), new Pong()).stream()
             .map(Client::runAsync)
             .collect(toList());
 
@@ -58,7 +62,7 @@ public class BrokerClientMultiThreadTests {
             .map(CompletableFuture::join)
             .collect(toList());
 
-        then(results.stream().count()).isEqualTo(2);
+        then(results.stream().count()).isEqualTo(3);
     }
 
     private interface Client {
@@ -76,33 +80,92 @@ public class BrokerClientMultiThreadTests {
                     LOGGER.error(ex.getLocalizedMessage(), ex);
                     return 0;
                 })
-                .completeOnTimeout(0, 50, TimeUnit.SECONDS);
+                .completeOnTimeout(0, 60, TimeUnit.SECONDS);
 
             return future;
         }
     }
 
-    @Slf4j
-    private static class Client1 implements Client {
+    private static class Ping implements Client {
 
-        private BrokerClientConfig defaultConfig;
-        private BrokerClient defaultBrokerClient;
-        private String EVENT = "PING";
+        private final int poolingPeriod = 1;
+        private final String EVENT = "PING";
+        private final String WAITING_EVENT = "PONG";
 
-        public Client1() {
-            defaultConfig = new BrokerClientConfig("config_ping.properties");
+        private final BrokerClientConfig defaultConfig;
+        private final BrokerClient defaultBrokerClient;
+
+        public Ping() {
+            defaultConfig = new BrokerClientConfig("ping-pong-game.properties", "ping");
             defaultBrokerClient = new BrokerClient(defaultConfig);
         }
 
+        @Override
         public Integer run() {
-            LOGGER.info("CLIENT 1");
+            LOGGER.info("Ping");
 
-            sleep(2);
-            IntStream.rangeClosed(1, 3)
+            IntStream.rangeClosed(1, 2)
                 .forEach(x -> {
-                    sleep(3);
-                    defaultBrokerClient.produce(EVENT, "");
+                    LOGGER.info("Iteration Ping: {}", x);
+                    var result = defaultBrokerClient.consume(WAITING_EVENT, poolingPeriod);
+                    defaultBrokerClient.produce(EVENT, "Ping");
                 });
+
+            return 1;
+        }
+
+    }
+
+    private static class Pong implements Client {
+
+        private final int poolingPeriod = 1;
+        private final String EVENT = "PONG";
+        private final String WAITING_EVENT = "PING";
+
+        private final BrokerClientConfig defaultConfig;
+        private final BrokerClient defaultBrokerClient;
+
+        public Pong() {
+            defaultConfig = new BrokerClientConfig("ping-pong-game.properties", "pong");
+            defaultBrokerClient = new BrokerClient(defaultConfig);
+        }
+
+        @Override
+        public Integer run() {
+            LOGGER.info("Pong");
+
+            IntStream.rangeClosed(1, 2)
+                .forEach(x -> {
+                    LOGGER.info("Iteration Ping: {}", x);
+                    var result = defaultBrokerClient.consume(WAITING_EVENT, poolingPeriod);
+                    defaultBrokerClient.produce(EVENT, "Pong");
+                });
+
+            return 1;
+        }
+
+    }
+
+    private static class Game implements Client {
+
+        private final int poolingPeriod = 1;
+        private final String EVENT = "PONG";
+
+        private final BrokerClientConfig defaultConfig;
+        private final BrokerClient defaultBrokerClient;
+
+        public Game() {
+            defaultConfig = new BrokerClientConfig("ping-pong-game.properties", "game");
+            defaultBrokerClient = new BrokerClient(defaultConfig);
+        }
+
+        @Override
+        public Integer run() {
+            LOGGER.info("Game");
+
+            sleep(10);
+            defaultBrokerClient.produce(EVENT, "Game Event");
+
             return 1;
         }
 
@@ -110,33 +173,8 @@ public class BrokerClientMultiThreadTests {
         private void sleep(int seconds) {
             Thread.sleep(seconds * 1000);
         }
-
-    }
-
-    @Slf4j
-    private static class Client2 implements Client {
-
-        final int poolingPeriod = 1;
-
-        private BrokerClientConfig defaultConfig;
-        private BrokerClient defaultBrokerClient;
-        private String EVENT = "PING";
-
-        public Client2() {
-            defaultConfig = new BrokerClientConfig("config_pong.properties");
-            defaultBrokerClient = new BrokerClient(defaultConfig);
-        }
-
-        public Integer run() {
-            LOGGER.info("CLIENT 2");
-            IntStream.rangeClosed(1, 3)
-                .forEach(x -> defaultBrokerClient.consume(EVENT, poolingPeriod));
-            return 1;
-        }
-
     }
 }
-
 ```
 
 ## Configuration
@@ -180,6 +218,9 @@ OpenJDK Client VM (build 14+36-ev3-unreleased, mixed mode, sharing)
 
 ## Dependency
 
+In order to use this library, you need to add the following
+dependency:
+
 ```
 <repositories>
     <repository>
@@ -193,9 +234,11 @@ OpenJDK Client VM (build 14+36-ev3-unreleased, mixed mode, sharing)
 <dependency>
     <groupId>com.github.broker-game</groupId>
     <artifactId>broker-client</artifactId>
-    <version>0.2.0-SNAPSHOT</version>
+    <version>0.3.0</version>
 </dependency>
 ```
+
+- https://jitpack.io/#broker-game/broker-client/0.3.0
 
 ## How to build the project?
 
