@@ -194,6 +194,10 @@ brokerclient.password=YYY
 **Note:** the client support configuration for multiple clients in the same file.
 Review the tests to learn the way.
 
+- https://github.com/broker-game/broker-client/tree/master/src/test/resources
+- https://github.com/broker-game/broker-client/blob/master/src/test/java/io/github/jabrena/broker/BrokerClientConfigTests.java
+
+
 ## JDK Requeriments in EV3
 
 Current default JVM has an issue with `CA Certificates` and it is necessary to
