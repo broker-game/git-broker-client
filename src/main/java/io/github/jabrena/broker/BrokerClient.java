@@ -139,6 +139,7 @@ public class BrokerClient {
      * @param poolingPeriod Pooling period
      * @return response
      */
+    @Deprecated
     public BrokerResponse consume(String event, int poolingPeriod) {
 
         var result = getInfiniteStream()
@@ -267,5 +268,10 @@ public class BrokerClient {
     public Producer newProducer(String event) {
 
         return new ProducerImpl(localRepositoryWrapper, gitWrapper, config, event);
+    }
+
+    public Consumer newConsumer() {
+
+        return new ConsumerImpl(localRepositoryWrapper, gitWrapper, config);
     }
 }
