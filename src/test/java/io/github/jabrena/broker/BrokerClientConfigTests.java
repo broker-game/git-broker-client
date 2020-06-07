@@ -57,7 +57,7 @@ class BrokerClientConfigTests {
     }
 
     @Test
-    public void given_Object_when_useConstructor_and_multipleConfigurations_and_nonVerboseProperties_then_loadProperties() {
+    public void given_Object_when_useConstructor_and_multipleConfigurations_and_nonVerbose_then_loadProperties() {
 
         BrokerClientConfig config = new BrokerClientConfig("application2.properties", "one");
 
@@ -81,7 +81,7 @@ class BrokerClientConfigTests {
     }
 
     @Test
-    public void given_Object_when_useConstructor_and_multipleConfigurations_and_nonVerboseProperties_and_missingFields_then_loadProperties() {
+    public void given_Object_when_constructor_and_multipleConfigurations_and_nonVerboses_and_missingFields_then_load() {
 
         Exception exception = assertThrows(RuntimeException.class, () -> {
             new BrokerClientConfig("application3.properties", "one");

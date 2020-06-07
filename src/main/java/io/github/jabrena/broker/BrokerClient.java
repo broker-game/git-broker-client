@@ -3,6 +3,7 @@ package io.github.jabrena.broker;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.annotations.VisibleForTesting;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
@@ -20,8 +21,9 @@ import static java.util.stream.Collectors.toList;
 @Slf4j
 public class BrokerClient {
 
-    LocalDirectoryWrapper localRepository;
+    LocalDirectoryWrapper localRepositoryWrapper;
     GitClientWrapper gitWrapper;
+    final BrokerClientConfig config;
 
     //Branch
     private final String application;
@@ -62,8 +64,9 @@ public class BrokerClient {
         this.user = user;
         this.password = password;
 
-        this.localRepository = new LocalDirectoryWrapper();
+        this.localRepositoryWrapper = new LocalDirectoryWrapper();
         this.gitWrapper = new GitClientWrapper();
+        this.config = new BrokerClientConfig(broker, application, node, fullName, email, user, password);
 
         //Connect
         this.connect();
@@ -88,17 +91,18 @@ public class BrokerClient {
 
     private void connect() {
 
-        localRepository.createLocalRepository(this.node);
-        gitWrapper.cloneRepository(localRepository.getLocalFS(), this.broker, this.application);
+        localRepositoryWrapper.createLocalRepository(this.node);
+        gitWrapper.cloneRepository(localRepositoryWrapper.getLocalFS(), this.broker, this.application);
     }
 
     /**
      * Produce
      *
-     * @param event event
+     * @param event   event
      * @param message message
      * @return
      */
+    @Deprecated
     public boolean produce(String event, Object message) {
 
         final String fileName = this.getFilename(event);
@@ -108,7 +112,7 @@ public class BrokerClient {
         final String fileContent = getFileContent(message);
 
         gitWrapper.upgradeRepository(this.application);
-        gitWrapper.addFile(this.localRepository.getLocalFS(), fileName, fileContent, this.fullName, this.email);
+        gitWrapper.addFile(this.localRepositoryWrapper.getLocalFS(), fileName, fileContent, this.fullName, this.email);
         gitWrapper.push(user, password);
 
         return true;
@@ -131,7 +135,7 @@ public class BrokerClient {
     /**
      * Consume
      *
-     * @param event event
+     * @param event         event
      * @param poolingPeriod Pooling period
      * @return response
      */
@@ -145,7 +149,7 @@ public class BrokerClient {
             })
             .map(x -> {
 
-                var localDirectory = this.localRepository.getLocalFS();
+                var localDirectory = this.localRepositoryWrapper.getLocalFS();
                 var counter = Arrays.stream(localDirectory.list())
                     .filter(y -> y.indexOf(".json") != -1)
                     .count();
@@ -216,7 +220,7 @@ public class BrokerClient {
 
         //Write checkpoint
         final String fileName = this.getFilename("OK");
-        gitWrapper.addFile(this.localRepository.getLocalFS(), fileName, "PROCESSED", fullName, email);
+        gitWrapper.addFile(this.localRepositoryWrapper.getLocalFS(), fileName, "PROCESSED", fullName, email);
         gitWrapper.push(user, password);
     }
 
@@ -234,26 +238,34 @@ public class BrokerClient {
      */
     public void close() {
 
-        if (Objects.nonNull(this.localRepository.getLocalFS())) {
+        if (Objects.nonNull(this.localRepositoryWrapper.getLocalFS())) {
             try {
-                Files.walk(this.localRepository.getLocalFS().toPath())
+                Files.walk(this.localRepositoryWrapper.getLocalFS().toPath())
                     .sorted(Comparator.reverseOrder())
                     .map(Path::toFile)
                     .forEach(File::delete);
 
-                assert (!this.localRepository.getLocalFS().exists());
+                assert (!this.localRepositoryWrapper.getLocalFS().exists());
             } catch (IOException e) {
                 LOGGER.warn(e.getLocalizedMessage(), e);
             }
         }
     }
 
-    //Testing purposes
+    @VisibleForTesting
     public void setLocalRepository(LocalDirectoryWrapper localRepository) {
-        this.localRepository = localRepository;
+        this.localRepositoryWrapper = localRepository;
     }
 
+    @VisibleForTesting
     public void setGitWrapper(GitClientWrapper gitWrapper) {
         this.gitWrapper = gitWrapper;
+    }
+
+    //TODO Refactor
+    //Create a builder
+    public Producer newProducer(String event) {
+
+        return new ProducerImpl(localRepositoryWrapper, gitWrapper, config, event);
     }
 }

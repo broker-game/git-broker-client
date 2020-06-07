@@ -8,6 +8,11 @@ import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+
 import static org.assertj.core.api.BDDAssertions.then;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
@@ -43,7 +48,7 @@ public class BrokerClientTests2 {
 
     @AfterEach
     public void close() {
-        defaultBrokerClient.close();
+        //defaultBrokerClient.close();
     }
 
     private static class Message {
@@ -71,7 +76,7 @@ public class BrokerClientTests2 {
 
     @Disabled
     @Test
-    public void given_Client_when_consumeForEvent_then_Ok() {
+    public void given_Client_when_consumeForEvent_then_Ok() throws IOException {
 
         doNothing().when(mockLocalRepository).createLocalRepository(ArgumentMatchers.anyString());
         doNothing().when(mockGitWrapper).cloneRepository(
@@ -83,7 +88,17 @@ public class BrokerClientTests2 {
             "1589573437533_PING_PING.json",
             "1589582622634_PING-NODE_OK.json"
         };
-        when(mockLocalRepository.getLocalFS().list()).thenReturn(fileArray);
+        //Path tempDirectory = Files.createTempDirectory("PING");
+        Path tempFile2 = Files.createTempFile("PING", "");
+
+        System.out.println(tempFile2.toString());
+
+        String data = "Test data";
+
+        Files.write(tempFile2, data.getBytes());
+        File tempFile = tempFile2.toFile();
+
+        when(mockLocalRepository.getLocalFS()).thenReturn(tempFile);
         doNothing().when(mockGitWrapper).addFile(
             ArgumentMatchers.any(), ArgumentMatchers.anyString(), ArgumentMatchers.anyString(),
             ArgumentMatchers.anyString(), ArgumentMatchers.anyString());
@@ -95,5 +110,4 @@ public class BrokerClientTests2 {
         BrokerResponse response = defaultBrokerClient.consume(EVENT, poolingPeriod);
         then(response).isNotNull();
     }
-
 }
