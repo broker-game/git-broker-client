@@ -2,7 +2,7 @@ package io.github.jabrena.broker;
 
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,9 +16,9 @@ import static java.util.stream.Collectors.toList;
 import static org.assertj.core.api.BDDAssertions.then;
 
 @Slf4j
-public class PingPongDemoTest {
+public class PingPongDemoTest extends BaseTestContainersTest {
 
-    @Disabled
+    @Tag("complex")
     @Test
     public void given_PingPongGame_when_execute_then_Ok() {
 
@@ -60,12 +60,19 @@ public class PingPongDemoTest {
         private final String EVENT = "PING";
         private final String WAITING_EVENT = "PONG";
 
-        private final BrokerClientConfig defaultConfig;
         private final BrokerClient defaultBrokerClient;
 
         public Ping() {
-            defaultConfig = new BrokerClientConfig("ping-pong-game.properties", "ping");
-            defaultBrokerClient = new BrokerClient(defaultConfig);
+
+            //TODO Review how to add dynamic fields in the Config Object
+            defaultBrokerClient = new BrokerClient(
+                BROKER_TEST_ADDRESS,
+                "PINGPONG",
+                "PING-NODE",
+                "Full Name",
+                "email@gmail.com",
+                "XXX",
+                "YYY");
         }
 
         @Override
@@ -90,12 +97,19 @@ public class PingPongDemoTest {
         private final String EVENT = "PONG";
         private final String WAITING_EVENT = "PING";
 
-        private final BrokerClientConfig defaultConfig;
         private final BrokerClient defaultBrokerClient;
 
         public Pong() {
-            defaultConfig = new BrokerClientConfig("ping-pong-game.properties", "pong");
-            defaultBrokerClient = new BrokerClient(defaultConfig);
+
+            //TODO Review how to add dynamic fields in the Config Object
+            defaultBrokerClient = new BrokerClient(
+                BROKER_TEST_ADDRESS,
+                "PINGPONG",
+                "PONG-NODE",
+                "Full Name",
+                "email@gmail.com",
+                "XXX",
+                "YYY");
         }
 
         @Override
@@ -119,12 +133,19 @@ public class PingPongDemoTest {
         private final int poolingPeriod = 1;
         private final String EVENT = "PONG";
 
-        private final BrokerClientConfig defaultConfig;
         private final BrokerClient defaultBrokerClient;
 
         public Game() {
-            defaultConfig = new BrokerClientConfig("ping-pong-game.properties", "game");
-            defaultBrokerClient = new BrokerClient(defaultConfig);
+
+            //TODO Review how to add dynamic fields in the Config Object
+            defaultBrokerClient = new BrokerClient(
+                BROKER_TEST_ADDRESS,
+                "PINGPONG",
+                "GAME-NODE",
+                "Full Name",
+                "email@gmail.com",
+                "XXX",
+                "YYY");
         }
 
         @Override

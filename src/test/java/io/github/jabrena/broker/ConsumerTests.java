@@ -1,18 +1,23 @@
 package io.github.jabrena.broker;
 
-import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 
 import java.util.stream.IntStream;
 
-@Slf4j
-public class ConsumerTests {
+public class ConsumerTests extends BaseTestContainersTest {
 
     @Test
     public void given_Consumer_when_consume_then_Ok() {
 
-        BrokerClientConfig defaultConfig = new BrokerClientConfig("brokerclient.e2e.properties");
-        BrokerClient client = new BrokerClient(defaultConfig);
+        //TODO Review how to add dynamic fields in the Config Object
+        BrokerClient client = new BrokerClient(
+            BROKER_TEST_ADDRESS,
+            "demo",
+            "node",
+            "jab",
+            "bren@juantonio.info",
+            "xxx",
+            "zzz");
 
         /*
         //In the future
