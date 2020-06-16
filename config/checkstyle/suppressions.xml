@@ -7,9 +7,12 @@
 <suppressions>
     <suppress checks="AbbreviationAsWordInName"
               files=".*/BrokerClientMultiThreadTests.java|
+              |.*/PingPongDemoTest.java|
+              |.*/BrokerClientTests2.java|
               |.*/BrokerClientTests.java|
               |.*/BrokerClientConfig.java" />
     <suppress checks="MemberName"
               files=".*/BrokerClientMultiThreadTests.java|
+              |.*/PingPongDemoTest.java|
               |.*/BrokerClientConfig.java" />
 </suppressions>

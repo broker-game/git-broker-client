@@ -2,7 +2,7 @@ package io.github.jabrena.broker;
 
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,10 +15,9 @@ import java.util.stream.IntStream;
 import static java.util.stream.Collectors.toList;
 import static org.assertj.core.api.BDDAssertions.then;
 
-@Slf4j
-public class BrokerClientMultiThreadTests {
+public class BrokerClientMultiThreadTests extends BaseTestContainersTest {
 
-    @Disabled
+    @Tag("complex")
     @Test
     public void given_Client_when_produceAndConsumeInParallelForEvent_then_Ok() {
 
@@ -56,16 +55,22 @@ public class BrokerClientMultiThreadTests {
         }
     }
 
-    @Slf4j
     private static class Client1 implements Client {
 
-        private BrokerClientConfig defaultConfig;
         private BrokerClient defaultBrokerClient;
         private String EVENT = "PING";
 
         public Client1() {
-            defaultConfig = new BrokerClientConfig("config_ping.properties");
-            defaultBrokerClient = new BrokerClient(defaultConfig);
+
+            //TODO Review how to add dynamic fields in the Config Object
+            defaultBrokerClient = new BrokerClient(
+                BROKER_TEST_ADDRESS,
+                "PINGPONG",
+                "PING-NODE",
+                "Full Name",
+                "email@gmail.com",
+                "XXX",
+                "YYY");
         }
 
         public Integer run() {
@@ -92,13 +97,20 @@ public class BrokerClientMultiThreadTests {
 
         final int poolingPeriod = 1;
 
-        private BrokerClientConfig defaultConfig;
         private BrokerClient defaultBrokerClient;
         private String EVENT = "PING";
 
         public Client2() {
-            defaultConfig = new BrokerClientConfig("config_pong.properties");
-            defaultBrokerClient = new BrokerClient(defaultConfig);
+
+            //TODO Review how to add dynamic fields in the Config Object
+            defaultBrokerClient = new BrokerClient(
+                BROKER_TEST_ADDRESS,
+                "PINGPONG",
+                "PONG-NODE",
+                "Full Name",
+                "email@gmail.com",
+                "XXX",
+                "YYY");
         }
 
         public Integer run() {
