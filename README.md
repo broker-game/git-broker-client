@@ -250,5 +250,5 @@ dependency:
 mvn clean test
 
 # Generate Checkstyle report
-mvn clean site -DskipTests
+mvn clean test site -DexcludedGroups=complex
 ```
