@@ -13,7 +13,7 @@ public class ProducerTests extends BaseTestContainersTest {
         BrokerClient client = new BrokerClient(
             BROKER_TEST_ADDRESS,
             "demo",
-            "node",
+            "PING-NODE",
             "jab",
             "bren@juantonio.info",
             "xxx",
@@ -28,6 +28,7 @@ public class ProducerTests extends BaseTestContainersTest {
 
         Producer<String> producer = client.newProducer()
             .topic("PING")
+            .event("PING-EVENT")
             .create();
 
         IntStream.rangeClosed(1, 2)

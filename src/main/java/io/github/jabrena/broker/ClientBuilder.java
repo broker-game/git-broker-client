@@ -25,6 +25,14 @@ public class ClientBuilder {
         return this;
     }
 
+    public ClientBuilder authentication(Authentication authentication) {
+        this.fullName = authentication.getFullName();
+        this.email = authentication.getEmail();
+        this.user = authentication.getUser();
+        this.password = authentication.getPassword();
+        return this;
+    };
+
     /**
      * Method to build a BrokerClient
      * @return BrokerClient
@@ -42,7 +50,11 @@ public class ClientBuilder {
         );
     }
 
-    //ClientBuilder authentication(Authentication authentication);
+    public ClientBuilder node(String node) {
+        this.node = node;
+        return this;
+    }
+
     //ClientBuilder loadConf(Map<String, Object> config);
     //ClientBuilder connectionTimeout(int duration, TimeUnit unit);
 

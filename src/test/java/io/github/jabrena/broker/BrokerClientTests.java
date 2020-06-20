@@ -2,6 +2,7 @@ package io.github.jabrena.broker;
 
 import lombok.Data;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.BDDAssertions.then;
@@ -59,6 +60,7 @@ public class BrokerClientTests  extends BaseTestContainersTest {
             .build();
     }
 
+    @Disabled
     @Test
     public void given_ClientBuilder_when_BuildWithNonMinimumParameters_then_Ko() {
 
@@ -72,13 +74,13 @@ public class BrokerClientTests  extends BaseTestContainersTest {
     @Test
     public void given_Client_when_useProducerBuilder_then_createProducer() {
 
+        /**
         //TODO, it is necessary to use this way in the future
-        /*
         BrokerClient client = BrokerClient.builder()
             .serviceUrl(BROKER_TEST_ADDRESS)
             .topic("demo")
             .build();
-         */
+        */
 
         BrokerClient client = new BrokerClient(
             BROKER_TEST_ADDRESS,
@@ -91,6 +93,26 @@ public class BrokerClientTests  extends BaseTestContainersTest {
 
         Producer producer = client.newProducer()
             .topic("demo")
+            .create();
+
+        producer.send("Hello World");
+        producer.send("Hello World 2");
+    }
+
+    @Test
+    public void given_ClientBuilder_when_useProducerBuilder_then_createProducer() {
+
+        //TODO, it is necessary to use this way in the future
+        BrokerClient client = BrokerClient.builder()
+            .serviceUrl(BROKER_TEST_ADDRESS)
+            //.topic("demo")
+            .authentication(new Authentication("user", "user@my-email.com", "xxx", "yyy"))
+            .node("PING-NODE")
+            .build();
+
+        Producer producer = client.newProducer()
+            .topic("PINGPONG")
+            .event("PING-EVENT")
             .create();
 
         producer.send("Hello World");
