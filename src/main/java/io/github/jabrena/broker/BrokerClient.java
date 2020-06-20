@@ -3,9 +3,7 @@ package io.github.jabrena.broker;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.annotations.VisibleForTesting;
 import io.github.jabrena.broker.impl.ConsumerImpl;
-import io.github.jabrena.broker.impl.ProducerImpl;
 import lombok.NonNull;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -256,21 +254,9 @@ public class BrokerClient {
         }
     }
 
-    @VisibleForTesting
-    public void setLocalRepository(LocalDirectoryWrapper localRepository) {
-        this.localRepositoryWrapper = localRepository;
-    }
+    public ProducerBuilder newProducer() {
 
-    @VisibleForTesting
-    public void setGitWrapper(GitClientWrapper gitWrapper) {
-        this.gitWrapper = gitWrapper;
-    }
-
-    //TODO Refactor
-    //Create a builder
-    public Producer newProducer(String event) {
-
-        return new ProducerImpl(localRepositoryWrapper, gitWrapper, config, event);
+        return new ProducerBuilder(localRepositoryWrapper, gitWrapper, config);
     }
 
     public Consumer newConsumer() {

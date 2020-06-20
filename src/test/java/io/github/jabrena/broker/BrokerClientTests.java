@@ -68,4 +68,32 @@ public class BrokerClientTests  extends BaseTestContainersTest {
                 .build();
         });
     }
+
+    @Test
+    public void given_Client_when_useProducerBuilder_then_createProducer() {
+
+        //TODO, it is necessary to use this way in the future
+        /*
+        BrokerClient client = BrokerClient.builder()
+            .serviceUrl(BROKER_TEST_ADDRESS)
+            .topic("demo")
+            .build();
+         */
+
+        BrokerClient client = new BrokerClient(
+            BROKER_TEST_ADDRESS,
+            "demo",
+            "node",
+            "jab",
+            "bren@juantonio.info",
+            "xxx",
+            "zzz");
+
+        Producer producer = client.newProducer()
+            .topic("demo")
+            .create();
+
+        producer.send("Hello World");
+        producer.send("Hello World 2");
+    }
 }
