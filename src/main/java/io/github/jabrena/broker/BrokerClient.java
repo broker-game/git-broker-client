@@ -3,7 +3,7 @@ package io.github.jabrena.broker;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.github.jabrena.broker.impl.ConsumerImpl;
+
 import lombok.NonNull;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -259,9 +259,9 @@ public class BrokerClient {
         return new ProducerBuilder(localRepositoryWrapper, gitWrapper, config);
     }
 
-    public Consumer newConsumer() {
+    public ConsumerBuilder newConsumer() {
 
-        return new ConsumerImpl(localRepositoryWrapper, gitWrapper, config);
+        return new ConsumerBuilder(localRepositoryWrapper, gitWrapper, config);
     }
 
     static ClientBuilder builder() {
