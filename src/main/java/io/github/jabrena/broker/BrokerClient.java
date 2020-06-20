@@ -4,6 +4,9 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.annotations.VisibleForTesting;
+import io.github.jabrena.broker.impl.ConsumerImpl;
+import io.github.jabrena.broker.impl.ProducerImpl;
+import lombok.NonNull;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
@@ -51,8 +54,8 @@ public class BrokerClient {
      * @param user        user
      * @param password    password
      */
-    public BrokerClient(String broker, String application, String node,
-                        String fullName, String email, String user, String password) {
+    public BrokerClient(@NonNull String broker, @NonNull String application,
+                        String node, String fullName, String email, String user, String password) {
 
         LOGGER.info("Creating an instance of BrokerClient");
 
@@ -273,5 +276,9 @@ public class BrokerClient {
     public Consumer newConsumer() {
 
         return new ConsumerImpl(localRepositoryWrapper, gitWrapper, config);
+    }
+
+    static ClientBuilder builder() {
+        return new ClientBuilder();
     }
 }

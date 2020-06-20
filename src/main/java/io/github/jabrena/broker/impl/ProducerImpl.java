@@ -1,8 +1,13 @@
-package io.github.jabrena.broker;
+package io.github.jabrena.broker.impl;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.github.jabrena.broker.BrokerClientConfig;
+import io.github.jabrena.broker.BrokerClientException;
+import io.github.jabrena.broker.GitClientWrapper;
+import io.github.jabrena.broker.LocalDirectoryWrapper;
+import io.github.jabrena.broker.Producer;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -17,7 +22,7 @@ import java.util.concurrent.CompletableFuture;
 
 @Slf4j
 @RequiredArgsConstructor
-final class ProducerImpl<T> implements Producer<T> {
+public final class ProducerImpl<T> implements Producer<T> {
 
     private final LocalDirectoryWrapper localRepositoryWrapper;
     private final GitClientWrapper gitWrapper;

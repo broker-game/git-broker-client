@@ -40,7 +40,7 @@ abstract class BaseTestContainersTest {
         BROKER_TEST_ADDRESS = "http://" + ip + ":" + port + "/test.git";
         LOGGER.info(BROKER_TEST_ADDRESS);
 
-        if(first.get()) {
+        if (first.get()) {
             createTheFirstCommit();
             first.set(false);
         }

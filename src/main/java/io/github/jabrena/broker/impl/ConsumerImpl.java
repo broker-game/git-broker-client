@@ -1,6 +1,14 @@
-package io.github.jabrena.broker;
+package io.github.jabrena.broker.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.github.jabrena.broker.BrokerClientConfig;
+import io.github.jabrena.broker.BrokerClientException;
+import io.github.jabrena.broker.BrokerFileParser;
+import io.github.jabrena.broker.BrokerResponse;
+import io.github.jabrena.broker.Consumer;
+import io.github.jabrena.broker.GitClientWrapper;
+import io.github.jabrena.broker.LocalDirectoryWrapper;
+import io.github.jabrena.broker.Message;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -35,6 +43,11 @@ public class ConsumerImpl<T> implements Consumer<T> {
         return null;
     }
 
+    /**
+     * consume an event stored in the Broker
+     * @param event event
+     * @return BrokerResponse
+     */
     public BrokerResponse consume(String event) {
 
         var result = getFiniteStream()
@@ -115,12 +128,13 @@ public class ConsumerImpl<T> implements Consumer<T> {
 
         //Write checkpoint
         final String fileName = this.getFilename("OK");
-        gitWrapper.addFile(this.localRepositoryWrapper.getLocalFS(), fileName, "PROCESSED", this.config.getFullName(), this.config.getEmail());
+        gitWrapper.addFile(this.localRepositoryWrapper.getLocalFS(), fileName, "PROCESSED",
+            this.config.getFullName(), this.config.getEmail());
         gitWrapper.push(this.config.getUser(), this.config.getPassword());
     }
 
     private Stream<Long> getFiniteStream() {
-        return IntStream.rangeClosed(1,1).boxed().map(Long::valueOf);
+        return IntStream.rangeClosed(1, 1).boxed().map(Long::valueOf);
     }
 
     private String getFilename(String event) {

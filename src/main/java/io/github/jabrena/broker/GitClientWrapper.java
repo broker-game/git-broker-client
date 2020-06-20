@@ -170,8 +170,9 @@ public class GitClientWrapper {
             LOGGER.info("commit msg={}", commit.getShortMessage());
             count++;
             Set<Ref> commitRefs = allsRefs.get(commit);
-            if (commitRefs==null)
+            if (commitRefs == null) {
                 continue;
+            }
             for (Ref ref : commitRefs) {
 
                 String name = ref.getName();
