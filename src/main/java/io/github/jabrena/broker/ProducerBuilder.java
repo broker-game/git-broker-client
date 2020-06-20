@@ -12,7 +12,6 @@ public class ProducerBuilder {
 
     private String application;
 
-
     public ProducerBuilder topic(String topic) {
         this.application = topic;
         return this;

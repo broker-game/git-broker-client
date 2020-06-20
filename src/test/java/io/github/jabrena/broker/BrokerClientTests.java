@@ -128,4 +128,5 @@ public class BrokerClientTests  extends BaseTestContainersTest {
             .subscribe();
         consumer.receive("PING");
     }
+
 }
