@@ -26,7 +26,9 @@ public class ConsumerTests extends BaseTestContainersTest {
             .build();
         */
 
-        Consumer consumer = client.newConsumer();
+        Consumer consumer = client.newConsumer()
+            //.topic("PING")
+            .subscribe();
 
         IntStream.rangeClosed(1, 5).boxed()
             .forEach(x -> {
