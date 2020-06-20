@@ -26,7 +26,9 @@ public class ProducerTests extends BaseTestContainersTest {
             .build();
         */
 
-        Producer<String> producer = client.newProducer("PING");
+        Producer<String> producer = client.newProducer()
+            .topic("PING")
+            .create();
 
         IntStream.rangeClosed(1, 2)
             .forEach(x -> {
