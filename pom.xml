@@ -25,7 +25,6 @@
         <assertj-core.version>3.13.2</assertj-core.version>
         <awaitility.version>3.0.0</awaitility.version>
 
-        <checkstyle.skip>true</checkstyle.skip>
     </properties>
 
     <dependencies>

@@ -5,6 +5,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.BDDAssertions.then;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class BrokerClientTests  extends BaseTestContainersTest {
 
@@ -49,4 +50,22 @@ public class BrokerClientTests  extends BaseTestContainersTest {
         then(response).isNotNull();
     }
 
+    @Test
+    public void given_ClientBuilder_when_BuildWithMinimumParameters_then_CreateBrokerClient() {
+
+        BrokerClient client = BrokerClient.builder()
+            .serviceUrl(BROKER_TEST_ADDRESS)
+            .topic("demo")
+            .build();
+    }
+
+    @Test
+    public void given_ClientBuilder_when_BuildWithNonMinimumParameters_then_Ko() {
+
+        assertThrows(IllegalArgumentException.class, () -> {
+            BrokerClient client = BrokerClient.builder()
+                .serviceUrl(BROKER_TEST_ADDRESS)
+                .build();
+        });
+    }
 }

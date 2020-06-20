@@ -5,6 +5,9 @@
     "https://checkstyle.org/dtds/suppressions_1_2.dtd">
 
 <suppressions>
+    <suppress checks="MissingJavadocMethod" files=".*/BrokerClientTests.java" />
+    <suppress checks="OverloadMethodsDeclarationOrder" files=".*/Consumer.java|
+              |.*/ConsumerImpl.java" />
     <suppress checks="AbbreviationAsWordInName"
               files=".*/BrokerClientMultiThreadTests.java|
               |.*/PingPongDemoTest.java|

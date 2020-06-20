@@ -247,8 +247,10 @@ dependency:
 ## How to build the project?
 
 ```
-mvn clean test
+mvn clean test -DexcludedGroups=complex
+
 
 # Generate Checkstyle report
+mvn clean site -DskipTests
 mvn clean test site -DexcludedGroups=complex
 ```

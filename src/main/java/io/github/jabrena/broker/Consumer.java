@@ -14,12 +14,10 @@ public interface Consumer<T> extends Closeable {
 
     Message<T> receive(int timeout, TimeUnit unit) throws BrokerClientException;
 
-    @Override
-    void close() throws BrokerClientException;
-
     CompletableFuture<Void> closeAsync();
 
     boolean hasReachedEndOfTopic();
+
     boolean isConnected();
 
     /**
@@ -27,5 +25,8 @@ public interface Consumer<T> extends Closeable {
      * @return consumer name.
      */
     String getConsumerName();
+
+    @Override
+    void close() throws BrokerClientException;
 
 }
