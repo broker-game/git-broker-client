@@ -1,23 +1,16 @@
 package io.github.jabrena.broker;
 
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import lombok.NonNull;
-import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Objects;
-import java.util.stream.Stream;
-
-import static java.util.stream.Collectors.toList;
 
 @Slf4j
 public class BrokerClient {
@@ -38,8 +31,6 @@ public class BrokerClient {
     private final String password;
     private final String fullName;
     private final String email;
-
-    private final ObjectMapper objectMapper = new ObjectMapper();
 
     /**
      * Constructor
@@ -94,145 +85,6 @@ public class BrokerClient {
 
         localRepositoryWrapper.createLocalRepository(this.node);
         gitWrapper.cloneRepository(localRepositoryWrapper.getLocalFS(), this.broker, this.application);
-    }
-
-    /**
-     * Produce
-     *
-     * @param event   event
-     * @param message message
-     * @return
-     */
-    @Deprecated
-    public boolean produce(String event, Object message) {
-
-        final String fileName = this.getFilename(event);
-
-        LOGGER.info("Producing event: {}", fileName);
-
-        final String fileContent = getFileContent(message);
-
-        gitWrapper.upgradeRepository(this.application);
-        gitWrapper.addFile(this.localRepositoryWrapper.getLocalFS(), fileName, fileContent, this.fullName, this.email);
-        gitWrapper.push(user, password);
-
-        return true;
-    }
-
-    @SneakyThrows
-    private String getFileContent(Object message) {
-        objectMapper.setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY);
-        return objectMapper.writeValueAsString(message);
-    }
-
-    private String getFilename(String event) {
-        return getEpoch() + "_" + this.node + "_" + event + ".json";
-    }
-
-    private long getEpoch() {
-        return System.currentTimeMillis();
-    }
-
-    /**
-     * Consume
-     *
-     * @param event         event
-     * @param poolingPeriod Pooling period
-     * @return response
-     */
-    @Deprecated
-    public BrokerResponse consume(String event, int poolingPeriod) {
-
-        var result = getInfiniteStream()
-            .map(x -> {
-                sleep(poolingPeriod);
-                gitWrapper.upgradeRepository(this.application);
-                return x;
-            })
-            .map(x -> {
-
-                var localDirectory = this.localRepositoryWrapper.getLocalFS();
-                var counter = Arrays.stream(localDirectory.list())
-                    .filter(y -> y.indexOf(".json") != -1)
-                    .count();
-
-                //Wait
-                if (counter == 0) {
-                    return x;
-                } else {
-
-                    //Detect last checkpoints
-                    var checkPointList = Arrays.stream(localDirectory.list())
-                        .filter(y -> y.indexOf("OK.json") != -1)
-                        .sorted()
-                        .collect(toList());
-
-                    if (checkPointList.size() > 0) {
-                        var lastCheckpoint = checkPointList.get(checkPointList.size() - 1);
-                        var list = Arrays.stream(localDirectory.list())
-                            .filter(y -> y.indexOf(".json") != -1)
-                            .sorted()
-                            .dropWhile(z -> !z.equals(lastCheckpoint))
-                            .map(BrokerFileParser::new)
-                            .filter(b -> b.getEvent().equals(event))
-                            .peek(System.out::println)
-                            .collect(toList());
-
-                        if (list.size() > 0) {
-                            LOGGER.info("Processing events: {} from last checkpoint: {}", event, lastCheckpoint);
-                            list.stream()
-                                .forEach(file -> LOGGER.info(file.toString()));
-
-                            writeCheckpoint();
-
-                            return null;
-                        } else {
-                            LOGGER.info("Without new events for: {} from last checkpoint: {}", event, lastCheckpoint);
-                        }
-
-                    } else if (checkPointList.size() == 0) {
-                        var count = Arrays.stream(localDirectory.list())
-                            .filter(y -> y.indexOf(".json") != -1)
-                            .map(BrokerFileParser::new)
-                            .filter(b -> b.getEvent().equals(event))
-                            .peek(System.out::println)
-                            .count();
-
-                        if (count > 0) {
-                            LOGGER.info("Processing events: {}", event);
-
-                            writeCheckpoint();
-
-                            //Break stream
-                            return null;
-                        }
-                        LOGGER.info("Without new events for: {} from last checkpoint: {}", event);
-                    }
-                }
-                return x;
-            })
-            //.peek(System.out::println)
-            .takeWhile(Objects::nonNull)
-            .count();
-
-        return new BrokerResponse();
-    }
-
-    private void writeCheckpoint() {
-
-        //Write checkpoint
-        final String fileName = this.getFilename("OK");
-        gitWrapper.addFile(this.localRepositoryWrapper.getLocalFS(), fileName, "PROCESSED", fullName, email);
-        gitWrapper.push(user, password);
-    }
-
-    private Stream<Long> getInfiniteStream() {
-        return Stream.iterate(0L, i -> i + 1L);
-    }
-
-    @SneakyThrows
-    private void sleep(int seconds) {
-        Thread.sleep(seconds * 1000);
     }
 
     /**

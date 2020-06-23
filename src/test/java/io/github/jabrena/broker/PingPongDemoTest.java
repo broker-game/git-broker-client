@@ -82,8 +82,8 @@ public class PingPongDemoTest extends BaseTestContainersTest {
             IntStream.rangeClosed(1, 2)
                 .forEach(x -> {
                     LOGGER.info("Iteration Ping: {}", x);
-                    var result = defaultBrokerClient.consume(WAITING_EVENT, poolingPeriod);
-                    defaultBrokerClient.produce(EVENT, "Ping");
+                    //var result = defaultBrokerClient.consume(WAITING_EVENT, poolingPeriod);
+                    //defaultBrokerClient.produce(EVENT, "Ping");
                 });
 
             return 1;
@@ -119,8 +119,8 @@ public class PingPongDemoTest extends BaseTestContainersTest {
             IntStream.rangeClosed(1, 2)
                 .forEach(x -> {
                     LOGGER.info("Iteration Ping: {}", x);
-                    var result = defaultBrokerClient.consume(WAITING_EVENT, poolingPeriod);
-                    defaultBrokerClient.produce(EVENT, "Pong");
+                    //var result = defaultBrokerClient.consume(WAITING_EVENT, poolingPeriod);
+                    //defaultBrokerClient.produce(EVENT, "Pong");
                 });
 
             return 1;
@@ -153,7 +153,7 @@ public class PingPongDemoTest extends BaseTestContainersTest {
             LOGGER.info("Game");
 
             sleep(10);
-            defaultBrokerClient.produce(EVENT, "Game Event");
+            //defaultBrokerClient.produce(EVENT, "Game Event");
 
             return 1;
         }

@@ -13,44 +13,6 @@ public class BrokerClientTests  extends BaseTestContainersTest {
     }
 
     @Test
-    public void given_Client_when_produceEvent_then_Ok() {
-
-        BrokerClient client = BrokerClient.builder()
-            .serviceUrl(BROKER_TEST_ADDRESS)
-            .authentication(new Authentication("user", "user@my-email.com", "xxx", "yyy"))
-            .node("PING-NODE")
-            .topic("demo")
-            .build();
-
-        final String EVENT = "PING-EVENT";
-        final Message MESSAGE = new Message();
-
-        then(client.produce(EVENT, MESSAGE)).isEqualTo(true);
-
-        client.close();
-    }
-
-    @Test
-    public void given_Client_when_consumeForEvent_then_Ok() {
-
-        BrokerClient client = BrokerClient.builder()
-            .serviceUrl(BROKER_TEST_ADDRESS)
-            .authentication(new Authentication("user", "user@my-email.com", "xxx", "yyy"))
-            .node("PING-NODE")
-            .topic("demo")
-            .build();
-
-        final String EVENT = "PING-EVENT";
-        final int poolingPeriod = 1;
-
-        client.produce(EVENT, new Message());
-        BrokerResponse response = client.consume(EVENT, poolingPeriod);
-        then(response).isNotNull();
-
-        client.close();
-    }
-
-    @Test
     public void given_Client_when_useProducerBuilder_then_createProducer() {
 
         BrokerClient client = BrokerClient.builder()

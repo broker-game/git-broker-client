@@ -110,14 +110,14 @@ public class BrokerClientMultiThreadTests extends BaseTestContainersTest {
                 .node("PONG-NODE")
                 .build();
 
-             consumer = client.newConsumer()
+            consumer = client.newConsumer()
                 .topic(EVENT)
                 .subscribe();
         }
 
         public Integer run() {
             LOGGER.info("CLIENT 2");
-            IntStream.rangeClosed(1, 30)
+            IntStream.rangeClosed(1, 10)
                 .forEach(x -> {
                     LOGGER.info("{}", x);
                     consumer.receive("PING");
