@@ -117,7 +117,7 @@ public class BrokerClientMultiThreadTests extends BaseTestContainersTest {
 
         public Integer run() {
             LOGGER.info("CLIENT 2");
-            IntStream.rangeClosed(1, 30)
+            IntStream.rangeClosed(1, 10)
                 .forEach(x -> {
                     LOGGER.info("{}", x);
                     consumer.receive("PING");
