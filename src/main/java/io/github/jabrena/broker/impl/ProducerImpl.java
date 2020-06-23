@@ -8,7 +8,6 @@ import io.github.jabrena.broker.BrokerClientException;
 import io.github.jabrena.broker.GitClientWrapper;
 import io.github.jabrena.broker.LocalDirectoryWrapper;
 import io.github.jabrena.broker.Producer;
-import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
@@ -21,15 +20,27 @@ import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 
 @Slf4j
-@RequiredArgsConstructor
 public final class ProducerImpl<T> implements Producer<T> {
 
     private final LocalDirectoryWrapper localRepositoryWrapper;
     private final GitClientWrapper gitWrapper;
     private final BrokerClientConfig config;
+    private final String application;
     private final String event;
 
     private final ObjectMapper objectMapper = new ObjectMapper();
+
+    public ProducerImpl(LocalDirectoryWrapper localRepositoryWrapper, GitClientWrapper gitWrapper, BrokerClientConfig config, String appication, String event) {
+        this.localRepositoryWrapper = localRepositoryWrapper;
+        this.gitWrapper = gitWrapper;
+        this.config = config;
+
+        this.application = appication;
+        this.event = event;
+
+
+        this.gitWrapper.checkout(this.event);
+    }
 
     @Override
     public String getTopic() {
@@ -50,7 +61,7 @@ public final class ProducerImpl<T> implements Producer<T> {
 
         final String fileContent = getFileContent(message);
 
-        gitWrapper.upgradeRepository(this.config.getApplication());
+        gitWrapper.upgradeRepository(this.application);
         gitWrapper.addFile(this.localRepositoryWrapper.getLocalFS(), fileName, fileContent,
             this.config.getFullName(), this.config.getEmail());
         gitWrapper.push(this.config.getUser(), this.config.getPassword());

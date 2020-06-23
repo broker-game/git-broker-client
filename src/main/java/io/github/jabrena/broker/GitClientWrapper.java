@@ -57,17 +57,32 @@ public class GitClientWrapper {
                 .setDirectory(file)
                 .call();
 
+            /*
             LOGGER.debug("Switching to branch: {}", branch);
             git.checkout()
                 .setCreateBranch(true)
                 .setName(branch)
                 .call();
 
+             */
+
             showLogs();
 
         } catch (RefNotFoundException e) {
             LOGGER.warn("Empty repository");
             LOGGER.warn(e.getLocalizedMessage());
+        } catch (GitAPIException e) {
+            LOGGER.warn(e.getLocalizedMessage(), e);
+        }
+    }
+
+    public void checkout(String branch) {
+        try {
+            LOGGER.debug("Switching to branch: {}", branch);
+            git.checkout()
+                .setCreateBranch(true)
+                .setName(branch)
+                .call();
         } catch (GitAPIException e) {
             LOGGER.warn(e.getLocalizedMessage(), e);
         }

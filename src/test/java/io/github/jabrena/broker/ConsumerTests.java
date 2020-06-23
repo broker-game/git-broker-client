@@ -9,31 +9,22 @@ public class ConsumerTests extends BaseTestContainersTest {
     @Test
     public void given_Consumer_when_consume_then_Ok() {
 
-        //TODO Review how to add dynamic fields in the Config Object
-        BrokerClient client = new BrokerClient(
-            BROKER_TEST_ADDRESS,
-            "demo",
-            "node",
-            "jab",
-            "bren@juantonio.info",
-            "xxx",
-            "zzz");
-
-        /*
-        //In the future
-        client = BrokerClient.builder()
-            .serviceUrl("https://github.com/broker-game/broker-dev-environment")
+        BrokerClient client = BrokerClient.builder()
+            .serviceUrl(BROKER_TEST_ADDRESS)
+            .authentication(new Authentication("user", "user@my-email.com", "xxx", "yyy"))
+            .node("PING-NODE")
             .build();
-        */
+
+        Producer<String> producer = client.newProducer()
+            .topic("PING")
+            .event("PING-EVENT")
+            .create();
+        producer.send("Hello World");
 
         Consumer consumer = client.newConsumer()
             //.topic("PING")
             .subscribe();
 
-        IntStream.rangeClosed(1, 5).boxed()
-            .forEach(x -> {
-                // Wait for a message
-                Message msg = consumer.receive("PING");
-            });
+        consumer.receive("PING-EVENT");
     }
 }

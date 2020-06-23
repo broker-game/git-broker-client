@@ -57,30 +57,33 @@ public class BrokerClientMultiThreadTests extends BaseTestContainersTest {
 
     private static class Client1 implements Client {
 
-        private BrokerClient defaultBrokerClient;
+        private BrokerClient client;
+        private Producer<String> producer;
         private String EVENT = "PING";
 
         public Client1() {
 
-            //TODO Review how to add dynamic fields in the Config Object
-            defaultBrokerClient = new BrokerClient(
-                BROKER_TEST_ADDRESS,
-                "PINGPONG",
-                "PING-NODE",
-                "Full Name",
-                "email@gmail.com",
-                "XXX",
-                "YYY");
+            client = BrokerClient.builder()
+                .serviceUrl(BROKER_TEST_ADDRESS)
+                .authentication(new Authentication("user", "user@my-email.com", "xxx", "yyy"))
+                .node("PING-NODE")
+                .build();
+
+            //TODO Something is not necessary... Topic vs Event
+            producer = client.newProducer()
+                .topic(EVENT)
+                .event(EVENT)
+                .create();
         }
 
         public Integer run() {
             LOGGER.info("CLIENT 1");
 
             sleep(2);
-            IntStream.rangeClosed(1, 3)
+            IntStream.rangeClosed(1, 3).boxed()
                 .forEach(x -> {
                     sleep(3);
-                    defaultBrokerClient.produce(EVENT, "");
+                    producer.send("Hello World " + x);
                 });
             return 1;
         }
@@ -95,30 +98,38 @@ public class BrokerClientMultiThreadTests extends BaseTestContainersTest {
     @Slf4j
     private static class Client2 implements Client {
 
-        final int poolingPeriod = 1;
-
-        private BrokerClient defaultBrokerClient;
+        private BrokerClient client;
+        private Consumer consumer;
         private String EVENT = "PING";
 
         public Client2() {
 
-            //TODO Review how to add dynamic fields in the Config Object
-            defaultBrokerClient = new BrokerClient(
-                BROKER_TEST_ADDRESS,
-                "PINGPONG",
-                "PONG-NODE",
-                "Full Name",
-                "email@gmail.com",
-                "XXX",
-                "YYY");
+            client = BrokerClient.builder()
+                .serviceUrl(BROKER_TEST_ADDRESS)
+                .authentication(new Authentication("user", "user@my-email.com", "xxx", "yyy"))
+                .node("PONG-NODE")
+                .build();
+
+             consumer = client.newConsumer()
+                .topic(EVENT)
+                .subscribe();
         }
 
         public Integer run() {
             LOGGER.info("CLIENT 2");
-            IntStream.rangeClosed(1, 3)
-                .forEach(x -> defaultBrokerClient.consume(EVENT, poolingPeriod));
+            IntStream.rangeClosed(1, 30)
+                .forEach(x -> {
+                    LOGGER.info("{}", x);
+                    consumer.receive("PING");
+                    sleep(1);
+                });
             return 1;
         }
 
+        @SneakyThrows
+        private void sleep(int seconds) {
+            Thread.sleep(seconds * 1000);
+        }
     }
+
 }

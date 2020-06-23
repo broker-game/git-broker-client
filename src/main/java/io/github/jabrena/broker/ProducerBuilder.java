@@ -11,13 +11,21 @@ public class ProducerBuilder {
     private final BrokerClientConfig config;
 
     private String application;
+    private String event;
 
     public ProducerBuilder topic(String topic) {
         this.application = topic;
         return this;
     }
 
-    public Producer create() {
-        return new ProducerImpl(localRepositoryWrapper, gitWrapper, config, application);
+    public ProducerBuilder event(String event) {
+        this.event = event;
+        return this;
     }
+
+    public Producer create() {
+        return new ProducerImpl(localRepositoryWrapper, gitWrapper, config, application, event);
+    }
+
+
 }

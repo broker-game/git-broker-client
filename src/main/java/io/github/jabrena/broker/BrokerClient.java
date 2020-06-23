@@ -52,7 +52,7 @@ public class BrokerClient {
      * @param user        user
      * @param password    password
      */
-    public BrokerClient(@NonNull String broker, @NonNull String application,
+    public BrokerClient(@NonNull String broker, String application,
                         String node, String fullName, String email, String user, String password) {
 
         LOGGER.info("Creating an instance of BrokerClient");
