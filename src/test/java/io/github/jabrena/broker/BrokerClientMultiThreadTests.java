@@ -110,7 +110,7 @@ public class BrokerClientMultiThreadTests extends BaseTestContainersTest {
                 .node("PONG-NODE")
                 .build();
 
-             consumer = client.newConsumer()
+            consumer = client.newConsumer()
                 .topic(EVENT)
                 .subscribe();
         }

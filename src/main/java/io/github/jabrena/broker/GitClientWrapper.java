@@ -76,6 +76,10 @@ public class GitClientWrapper {
         }
     }
 
+    /**
+     * Checkout
+     * @param branch Git Branch
+     */
     public void checkout(String branch) {
         try {
             LOGGER.debug("Switching to branch: {}", branch);

@@ -30,12 +30,22 @@ public final class ProducerImpl<T> implements Producer<T> {
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
-    public ProducerImpl(LocalDirectoryWrapper localRepositoryWrapper, GitClientWrapper gitWrapper, BrokerClientConfig config, String appication, String event) {
+    /**
+     * Constructor
+     *
+     * @param localRepositoryWrapper localRepositoryWrapper
+     * @param gitWrapper gitWrapper
+     * @param config configuration
+     * @param application application
+     * @param event event
+     */
+    public ProducerImpl(LocalDirectoryWrapper localRepositoryWrapper, GitClientWrapper gitWrapper,
+                        BrokerClientConfig config, String application, String event) {
         this.localRepositoryWrapper = localRepositoryWrapper;
         this.gitWrapper = gitWrapper;
         this.config = config;
 
-        this.application = appication;
+        this.application = application;
         this.event = event;
 
 

@@ -25,13 +25,18 @@ public class ClientBuilder {
         return this;
     }
 
+    /**
+     * Add authentication data
+     * @param authentication Authentication object
+     * @return ClientBuilder
+     */
     public ClientBuilder authentication(Authentication authentication) {
         this.fullName = authentication.getFullName();
         this.email = authentication.getEmail();
         this.user = authentication.getUser();
         this.password = authentication.getPassword();
         return this;
-    };
+    }
 
     /**
      * Method to build a BrokerClient

@@ -1,23 +1,16 @@
 package io.github.jabrena.broker;
 
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import lombok.NonNull;
-import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Objects;
-import java.util.stream.Stream;
-
-import static java.util.stream.Collectors.toList;
 
 @Slf4j
 public class BrokerClient {
@@ -38,8 +31,6 @@ public class BrokerClient {
     private final String password;
     private final String fullName;
     private final String email;
-
-    private final ObjectMapper objectMapper = new ObjectMapper();
 
     /**
      * Constructor
