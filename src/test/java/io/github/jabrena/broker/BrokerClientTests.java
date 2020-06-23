@@ -1,30 +1,11 @@
 package io.github.jabrena.broker;
 
 import lombok.Data;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.BDDAssertions.then;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class BrokerClientTests  extends BaseTestContainersTest {
-
-    private BrokerClient client;
-
-    @BeforeEach
-    public void setUp() {
-
-        //TODO Review how to add dynamic fields in the Config Object
-        client = new BrokerClient(
-            BROKER_TEST_ADDRESS,
-            "demo",
-            "node",
-            "jab",
-            "bren@juantonio.info",
-            "xxx",
-            "zzz");
-    }
 
     @Data
     private static class Message {
@@ -34,14 +15,30 @@ public class BrokerClientTests  extends BaseTestContainersTest {
     @Test
     public void given_Client_when_produceEvent_then_Ok() {
 
+        BrokerClient client = BrokerClient.builder()
+            .serviceUrl(BROKER_TEST_ADDRESS)
+            .authentication(new Authentication("user", "user@my-email.com", "xxx", "yyy"))
+            .node("PING-NODE")
+            .topic("demo")
+            .build();
+
         final String EVENT = "PING-EVENT";
         final Message MESSAGE = new Message();
 
         then(client.produce(EVENT, MESSAGE)).isEqualTo(true);
+
+        client.close();
     }
 
     @Test
     public void given_Client_when_consumeForEvent_then_Ok() {
+
+        BrokerClient client = BrokerClient.builder()
+            .serviceUrl(BROKER_TEST_ADDRESS)
+            .authentication(new Authentication("user", "user@my-email.com", "xxx", "yyy"))
+            .node("PING-NODE")
+            .topic("demo")
+            .build();
 
         final String EVENT = "PING-EVENT";
         final int poolingPeriod = 1;
@@ -49,60 +46,34 @@ public class BrokerClientTests  extends BaseTestContainersTest {
         client.produce(EVENT, new Message());
         BrokerResponse response = client.consume(EVENT, poolingPeriod);
         then(response).isNotNull();
-    }
 
-    @Test
-    public void given_ClientBuilder_when_BuildWithMinimumParameters_then_CreateBrokerClient() {
-
-        BrokerClient client = BrokerClient.builder()
-            .serviceUrl(BROKER_TEST_ADDRESS)
-            .topic("demo")
-            .build();
-    }
-
-    @Disabled
-    @Test
-    public void given_ClientBuilder_when_BuildWithNonMinimumParameters_then_Ko() {
-
-        assertThrows(IllegalArgumentException.class, () -> {
-            BrokerClient client = BrokerClient.builder()
-                .serviceUrl(BROKER_TEST_ADDRESS)
-                .build();
-        });
+        client.close();
     }
 
     @Test
     public void given_Client_when_useProducerBuilder_then_createProducer() {
 
-        /**
-        //TODO, it is necessary to use this way in the future
         BrokerClient client = BrokerClient.builder()
             .serviceUrl(BROKER_TEST_ADDRESS)
+            .authentication(new Authentication("user", "user@my-email.com", "xxx", "yyy"))
+            .node("PING-NODE")
             .topic("demo")
             .build();
-        */
-
-        BrokerClient client = new BrokerClient(
-            BROKER_TEST_ADDRESS,
-            "demo",
-            "node",
-            "jab",
-            "bren@juantonio.info",
-            "xxx",
-            "zzz");
 
         Producer producer = client.newProducer()
             .topic("demo")
+            .event("PING-EVENT")
             .create();
 
         producer.send("Hello World");
         producer.send("Hello World 2");
+
+        client.close();
     }
 
     @Test
     public void given_ClientBuilder_when_useProducerBuilder_then_createProducer() {
 
-        //TODO, it is necessary to use this way in the future
         BrokerClient client = BrokerClient.builder()
             .serviceUrl(BROKER_TEST_ADDRESS)
             //.topic("demo")
@@ -117,30 +88,24 @@ public class BrokerClientTests  extends BaseTestContainersTest {
 
         producer.send("Hello World");
         producer.send("Hello World 2");
+
+        client.close();
     }
 
     @Test
     public void given_Client_when_useConsumerBuilder_then_createConsumer() {
 
-        //TODO, it is necessary to use this way in the future
-        /*
         BrokerClient client = BrokerClient.builder()
             .serviceUrl(BROKER_TEST_ADDRESS)
-            .topic("demo")
+            //.topic("demo")
+            .authentication(new Authentication("user", "user@my-email.com", "xxx", "yyy"))
+            .node("PING-NODE")
+            .topic("PING")
             .build();
-         */
-
-        BrokerClient client = new BrokerClient(
-            BROKER_TEST_ADDRESS,
-            "demo",
-            "node",
-            "jab",
-            "bren@juantonio.info",
-            "xxx",
-            "zzz");
 
         Producer producer = client.newProducer()
             .topic("PING")
+            .event("PING-EVENT")
             .create();
 
         producer.send("Hello World");
@@ -148,7 +113,9 @@ public class BrokerClientTests  extends BaseTestContainersTest {
         Consumer consumer = client.newConsumer()
             //.topic("PING")
             .subscribe();
-        consumer.receive("PING");
+        consumer.receive("PING-EVENT");
+
+        client.close();
     }
 
 }
