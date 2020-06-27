@@ -2,8 +2,8 @@ package io.github.jabrena.broker.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.github.jabrena.broker.Authentication;
-import io.github.jabrena.broker.BrokerClientException;
-import io.github.jabrena.broker.BrokerFileParser;
+import io.github.jabrena.broker.GitBrokerClientException;
+import io.github.jabrena.broker.GitBrokerFileParser;
 import io.github.jabrena.broker.Consumer;
 import io.github.jabrena.broker.GitClientWrapper;
 import io.github.jabrena.broker.LocalDirectoryWrapper;
@@ -18,8 +18,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.IntStream;
-import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toUnmodifiableList;
@@ -70,7 +68,7 @@ public class ConsumerImpl<T> implements Consumer<T> {
     }
 
     @Override
-    public Message<T> receive() throws BrokerClientException {
+    public Message<T> receive() throws GitBrokerClientException {
         return null;
     }
 
@@ -97,7 +95,7 @@ public class ConsumerImpl<T> implements Consumer<T> {
     }
 
     @Override
-    public Message<T> receive(int timeout, TimeUnit unit) throws BrokerClientException {
+    public Message<T> receive(int timeout, TimeUnit unit) throws GitBrokerClientException {
         return null;
     }
 
@@ -130,7 +128,7 @@ public class ConsumerImpl<T> implements Consumer<T> {
                     .sorted()
                     .dropWhile(z -> !z.equals(lastCheckpoint))
                     .filter(y -> y.indexOf("OK.json") == -1)
-                    .map(BrokerFileParser::new)
+                    .map(GitBrokerFileParser::new)
                     //.filter(b -> b.getEvent().equals(event))
                     .peek(System.out::println)
                     .collect(toList());
@@ -165,7 +163,7 @@ public class ConsumerImpl<T> implements Consumer<T> {
 
                 var count = Arrays.stream(localDirectory.list())
                     .filter(y -> y.indexOf(".json") != -1)
-                    .map(BrokerFileParser::new)
+                    .map(GitBrokerFileParser::new)
                     //.filter(b -> b.getEvent().equals(event))
                     //.peek(System.out::println)
                     .count();
@@ -175,7 +173,7 @@ public class ConsumerImpl<T> implements Consumer<T> {
 
                     var list = Arrays.stream(localDirectory.list())
                         .filter(y -> y.indexOf(".json") != -1)
-                        .map(BrokerFileParser::new)
+                        .map(GitBrokerFileParser::new)
                         .collect(toUnmodifiableList());
 
                     writeCheckpoint();
@@ -217,7 +215,7 @@ public class ConsumerImpl<T> implements Consumer<T> {
             public Iterator<Message<T>> iterator() {
                 return List.of().stream()
                     .map(String::valueOf)
-                    .map(BrokerFileParser::new)
+                    .map(GitBrokerFileParser::new)
                     .map(x -> (Message<T>) new MessageImpl<T>(x, localRepositoryWrapper))
                     .collect(toUnmodifiableList())
                     .iterator();
@@ -226,7 +224,7 @@ public class ConsumerImpl<T> implements Consumer<T> {
     }
 
     @Override
-    public void close() throws BrokerClientException {
+    public void close() throws GitBrokerClientException {
 
     }
 

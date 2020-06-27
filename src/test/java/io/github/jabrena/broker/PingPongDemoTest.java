@@ -34,9 +34,8 @@ public class PingPongDemoTest extends BaseTestContainersTest {
 
         then(results.stream().count()).isEqualTo(3);
 
-        BrokerClient client = BrokerClient.builder()
+        GitBrokerClient client = GitBrokerClient.builder()
             .serviceUrl(BROKER_TEST_ADDRESS)
-            //.authentication(authentication)
             .build();
 
         Reader<String> reader = client.newReader()
@@ -83,7 +82,7 @@ public class PingPongDemoTest extends BaseTestContainersTest {
         private final String TOPIC_CONSUME = "PONG";
         private final String NODE = "PING-NODE";
 
-        private BrokerClient client;
+        private GitBrokerClient client;
         private Producer<String> producer;
         private Consumer<String> consumer;
 
@@ -92,7 +91,7 @@ public class PingPongDemoTest extends BaseTestContainersTest {
 
         public Ping() {
 
-            client = BrokerClient.builder()
+            client = GitBrokerClient.builder()
                 .serviceUrl(BROKER_TEST_ADDRESS)
                 .authentication(authentication)
                 .build();
@@ -130,7 +129,7 @@ public class PingPongDemoTest extends BaseTestContainersTest {
         private final String TOPIC_CONSUME = "PING";
         private final String NODE = "PONG-NODE";
 
-        private BrokerClient client;
+        private GitBrokerClient client;
         private Producer<String> producer;
         private Consumer<String> consumer;
 
@@ -139,7 +138,7 @@ public class PingPongDemoTest extends BaseTestContainersTest {
 
         public Pong() {
 
-            client = BrokerClient.builder()
+            client = GitBrokerClient.builder()
                 .serviceUrl(BROKER_TEST_ADDRESS)
                 .authentication(authentication)
                 .build();
@@ -176,7 +175,7 @@ public class PingPongDemoTest extends BaseTestContainersTest {
         private final String TOPIC_PRODUCE = "PING";
         private final String NODE = "GAME-NODE";
 
-        private BrokerClient client;
+        private GitBrokerClient client;
         private Producer<String> producer;
 
         Authentication authentication =
@@ -184,7 +183,7 @@ public class PingPongDemoTest extends BaseTestContainersTest {
 
         public Game() {
 
-            client = BrokerClient.builder()
+            client = GitBrokerClient.builder()
                 .serviceUrl(BROKER_TEST_ADDRESS)
                 .authentication(authentication)
                 .build();

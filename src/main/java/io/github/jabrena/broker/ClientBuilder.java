@@ -35,9 +35,9 @@ public class ClientBuilder {
      * Method to build a BrokerClient
      * @return BrokerClient
      */
-    public BrokerClient build() {
+    public GitBrokerClient build() {
 
-        return new BrokerClient(
+        return new GitBrokerClient(
             this.broker,
             this.authentication
         );

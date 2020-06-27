@@ -1,7 +1,7 @@
 package io.github.jabrena.broker.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.github.jabrena.broker.BrokerFileParser;
+import io.github.jabrena.broker.GitBrokerFileParser;
 import io.github.jabrena.broker.LocalDirectoryWrapper;
 import io.github.jabrena.broker.Message;
 import lombok.SneakyThrows;
@@ -22,7 +22,7 @@ public class MessageImpl<T> implements Message<T> {
      * @param brokerFileParser BrokerFileParser
      * @param localRepositoryWrapper localRepositoryWrapper
      */
-    public MessageImpl(BrokerFileParser brokerFileParser, LocalDirectoryWrapper localRepositoryWrapper) {
+    public MessageImpl(GitBrokerFileParser brokerFileParser, LocalDirectoryWrapper localRepositoryWrapper) {
         this.localRepositoryWrapper = localRepositoryWrapper;
         this.publishTime = brokerFileParser.getEpoch();
         this.raw = brokerFileParser.getRaw();

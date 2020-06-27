@@ -11,9 +11,9 @@ public interface Reader<T> extends Closeable {
 
     String getTopic();
 
-    Message<T> readNext() throws BrokerClientException;
+    Message<T> readNext() throws GitBrokerClientException;
 
-    Message<T> readNext(int timeout, TimeUnit unit) throws BrokerClientException;
+    Message<T> readNext(int timeout, TimeUnit unit) throws GitBrokerClientException;
 
     CompletableFuture<Message<T>> readNextAsync();
 
@@ -21,13 +21,13 @@ public interface Reader<T> extends Closeable {
 
     boolean hasReachedEndOfTopic();
 
-    boolean hasMessageAvailable() throws BrokerClientException;
+    boolean hasMessageAvailable() throws GitBrokerClientException;
 
     CompletableFuture<Boolean> hasMessageAvailableAsync();
 
     boolean isConnected();
 
-    void seek(long timestamp) throws BrokerClientException;
+    void seek(long timestamp) throws GitBrokerClientException;
 
     CompletableFuture<Void> seekAsync(long timestamp);
 }

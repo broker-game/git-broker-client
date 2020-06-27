@@ -49,7 +49,7 @@ which offer `free` git accounts to store the code.
 
 ``` java
 @Slf4j
-public class PingPongDemoTest {
+public class PingPongDemoTest extends BaseTestContainersTest {
 
     @Test
     public void given_PingPongGame_when_execute_then_Ok() {
@@ -63,6 +63,26 @@ public class PingPongDemoTest {
             .collect(toList());
 
         then(results.stream().count()).isEqualTo(3);
+
+        GitBrokerClient client = GitBrokerClient.builder()
+            .serviceUrl(BROKER_TEST_ADDRESS)
+            .build();
+
+        Reader<String> reader = client.newReader()
+            .topic("PING")
+            .create();
+
+        int counter = 0;
+        while (true) {
+            if (reader.hasReachedEndOfTopic()) {
+                break;
+            }
+            Message<String> value = reader.readNext();
+            LOGGER.info(value.getValue());
+            counter++;
+        }
+        LOGGER.info("{}", counter);
+        then(counter).isBetween(9, 11);
     }
 
     private interface Client {
@@ -88,27 +108,44 @@ public class PingPongDemoTest {
 
     private static class Ping implements Client {
 
-        private final int poolingPeriod = 1;
-        private final String EVENT = "PING";
-        private final String WAITING_EVENT = "PONG";
+        private final String TOPIC_PRODUCE = "PING";
+        private final String TOPIC_CONSUME = "PONG";
+        private final String NODE = "PING-NODE";
 
-        private final BrokerClientConfig defaultConfig;
-        private final BrokerClient defaultBrokerClient;
+        private GitBrokerClient client;
+        private Producer<String> producer;
+        private Consumer<String> consumer;
+
+        Authentication authentication =
+            new Authentication("user", "user@my-email.com", "xxx", "yyy");
 
         public Ping() {
-            defaultConfig = new BrokerClientConfig("ping-pong-game.properties", "ping");
-            defaultBrokerClient = new BrokerClient(defaultConfig);
+
+            client = GitBrokerClient.builder()
+                .serviceUrl(BROKER_TEST_ADDRESS)
+                .authentication(authentication)
+                .build();
+
+            producer = client.newProducer()
+                .topic(TOPIC_PRODUCE)
+                .node(NODE)
+                .create();
+
+            consumer = client.newConsumer()
+                .topic(TOPIC_CONSUME)
+                .node(NODE)
+                .subscribe();
         }
 
         @Override
         public Integer run() {
             LOGGER.info("Ping");
 
-            IntStream.rangeClosed(1, 2)
+            IntStream.rangeClosed(1, 5)
                 .forEach(x -> {
                     LOGGER.info("Iteration Ping: {}", x);
-                    var result = defaultBrokerClient.consume(WAITING_EVENT, poolingPeriod);
-                    defaultBrokerClient.produce(EVENT, "Ping");
+                    consumer.batchReceive();
+                    producer.send("Ping");
                 });
 
             return 1;
@@ -118,27 +155,44 @@ public class PingPongDemoTest {
 
     private static class Pong implements Client {
 
-        private final int poolingPeriod = 1;
-        private final String EVENT = "PONG";
-        private final String WAITING_EVENT = "PING";
+        private final String TOPIC_PRODUCE = "PONG";
+        private final String TOPIC_CONSUME = "PING";
+        private final String NODE = "PONG-NODE";
 
-        private final BrokerClientConfig defaultConfig;
-        private final BrokerClient defaultBrokerClient;
+        private GitBrokerClient client;
+        private Producer<String> producer;
+        private Consumer<String> consumer;
+
+        Authentication authentication =
+            new Authentication("user", "user@my-email.com", "xxx", "yyy");
 
         public Pong() {
-            defaultConfig = new BrokerClientConfig("ping-pong-game.properties", "pong");
-            defaultBrokerClient = new BrokerClient(defaultConfig);
+
+            client = GitBrokerClient.builder()
+                .serviceUrl(BROKER_TEST_ADDRESS)
+                .authentication(authentication)
+                .build();
+
+            producer = client.newProducer()
+                .topic(TOPIC_PRODUCE)
+                .node(NODE)
+                .create();
+
+            consumer = client.newConsumer()
+                .topic(TOPIC_CONSUME)
+                .node(NODE)
+                .subscribe();
         }
 
         @Override
         public Integer run() {
             LOGGER.info("Pong");
 
-            IntStream.rangeClosed(1, 2)
+            IntStream.rangeClosed(1, 5)
                 .forEach(x -> {
-                    LOGGER.info("Iteration Ping: {}", x);
-                    var result = defaultBrokerClient.consume(WAITING_EVENT, poolingPeriod);
-                    defaultBrokerClient.produce(EVENT, "Pong");
+                    LOGGER.info("Iteration Pong: {}", x);
+                    consumer.batchReceive();
+                    producer.send("Pong");
                 });
 
             return 1;
@@ -148,15 +202,26 @@ public class PingPongDemoTest {
 
     private static class Game implements Client {
 
-        private final int poolingPeriod = 1;
-        private final String EVENT = "PONG";
+        private final String TOPIC_PRODUCE = "PING";
+        private final String NODE = "GAME-NODE";
 
-        private final BrokerClientConfig defaultConfig;
-        private final BrokerClient defaultBrokerClient;
+        private GitBrokerClient client;
+        private Producer<String> producer;
+
+        Authentication authentication =
+            new Authentication("user", "user@my-email.com", "xxx", "yyy");
 
         public Game() {
-            defaultConfig = new BrokerClientConfig("ping-pong-game.properties", "game");
-            defaultBrokerClient = new BrokerClient(defaultConfig);
+
+            client = GitBrokerClient.builder()
+                .serviceUrl(BROKER_TEST_ADDRESS)
+                .authentication(authentication)
+                .build();
+
+            producer = client.newProducer()
+                .topic(TOPIC_PRODUCE)
+                .node(NODE)
+                .create();
         }
 
         @Override
@@ -164,7 +229,7 @@ public class PingPongDemoTest {
             LOGGER.info("Game");
 
             sleep(10);
-            defaultBrokerClient.produce(EVENT, "Game Event");
+            producer.send("Game");
 
             return 1;
         }
@@ -173,30 +238,13 @@ public class PingPongDemoTest {
         private void sleep(int seconds) {
             Thread.sleep(seconds * 1000);
         }
+
     }
+
+
 }
-```
-
-## Configuration
-
-You can declare the client in a Java class or use a PropertyFile.
 
 ```
-brokerclient.broker=https://github.com/broker-game/broker-dev-environment
-brokerclient.application=PINGPONG
-brokerclient.node=PING-NODE
-brokerclient.fullname=Juan Antonio Breña Moral
-brokerclient.email=bren@juanantonio.info
-brokerclient.user=XXX
-brokerclient.password=YYY
-```
-
-**Note:** the client support configuration for multiple clients in the same file.
-Review the tests to learn the way.
-
-- https://github.com/broker-game/broker-client/tree/master/src/test/resources
-- https://github.com/broker-game/broker-client/blob/master/src/test/java/io/github/jabrena/broker/BrokerClientConfigTests.java
-
 
 ## JDK Requeriments in EV3
 

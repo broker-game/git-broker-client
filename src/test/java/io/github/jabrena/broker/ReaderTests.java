@@ -16,7 +16,7 @@ public class ReaderTests extends BaseTestContainersTest {
         Authentication authentication =
             new Authentication("user", "user@my-email.com", "xxx", "yyy");
 
-        BrokerClient client = BrokerClient.builder()
+        GitBrokerClient client = GitBrokerClient.builder()
             .serviceUrl(BROKER_TEST_ADDRESS)
             .authentication(authentication)
             .build();
@@ -36,7 +36,7 @@ public class ReaderTests extends BaseTestContainersTest {
         Authentication authentication =
             new Authentication("user", "user@my-email.com", "xxx", "yyy");
 
-        BrokerClient client = BrokerClient.builder()
+        GitBrokerClient client = GitBrokerClient.builder()
             .serviceUrl(BROKER_TEST_ADDRESS)
             .authentication(authentication)
             .build();

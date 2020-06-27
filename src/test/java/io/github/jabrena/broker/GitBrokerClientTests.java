@@ -9,12 +9,12 @@ import static org.assertj.core.api.BDDAssertions.then;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @Slf4j
-public class BrokerClientTests  extends BaseTestContainersTest {
+public class GitBrokerClientTests extends BaseTestContainersTest {
 
     @Test
     public void given_ClientBuilder_when_buildWithServiceUrl_then_createClient() {
 
-        BrokerClient client = BrokerClient.builder()
+        GitBrokerClient client = GitBrokerClient.builder()
             .serviceUrl(BROKER_TEST_ADDRESS)
             .build();
 
@@ -24,7 +24,7 @@ public class BrokerClientTests  extends BaseTestContainersTest {
     @Test
     public void given_ClientBuilder_when_use_serviceUrl_and_build_then_createClient() {
 
-        Exception exception = assertThrows(IllegalArgumentException.class, () -> BrokerClient.builder().build());
+        Exception exception = assertThrows(IllegalArgumentException.class, () -> GitBrokerClient.builder().build());
 
         String expectedMessage = "broker is marked non-null but is null";
         then(exception.getMessage()).isEqualTo(expectedMessage);
@@ -36,7 +36,7 @@ public class BrokerClientTests  extends BaseTestContainersTest {
         Authentication authentication =
             new Authentication("user", "user@my-email.com", "xxx", "yyy");
 
-        BrokerClient client = BrokerClient.builder()
+        GitBrokerClient client = GitBrokerClient.builder()
             .serviceUrl(BROKER_TEST_ADDRESS)
             .authentication(authentication)
             .build();
@@ -50,7 +50,7 @@ public class BrokerClientTests  extends BaseTestContainersTest {
         Authentication authentication =
             new Authentication("user", "user@my-email.com", "xxx", "yyy");
 
-        BrokerClient client = BrokerClient.builder()
+        GitBrokerClient client = GitBrokerClient.builder()
             .serviceUrl(BROKER_TEST_ADDRESS)
             .authentication(authentication)
             .build();
@@ -72,7 +72,7 @@ public class BrokerClientTests  extends BaseTestContainersTest {
         Authentication authentication =
             new Authentication("user", "user@my-email.com", "xxx", "yyy");
 
-        BrokerClient client = BrokerClient.builder()
+        GitBrokerClient client = GitBrokerClient.builder()
             .serviceUrl(BROKER_TEST_ADDRESS)
             .authentication(authentication)
             .build();
@@ -95,7 +95,7 @@ public class BrokerClientTests  extends BaseTestContainersTest {
         Authentication authentication =
             new Authentication("user", "user@my-email.com", "xxx", "yyy");
 
-        BrokerClient client = BrokerClient.builder()
+        GitBrokerClient client = GitBrokerClient.builder()
             .serviceUrl(BROKER_TEST_ADDRESS)
             .authentication(authentication)
             .build();
@@ -114,7 +114,7 @@ public class BrokerClientTests  extends BaseTestContainersTest {
         Authentication authentication =
             new Authentication("user", "user@my-email.com", "xxx", "yyy");
 
-        BrokerClient client = BrokerClient.builder()
+        GitBrokerClient client = GitBrokerClient.builder()
             .serviceUrl(BROKER_TEST_ADDRESS)
             .authentication(authentication)
             .build();
@@ -138,7 +138,7 @@ public class BrokerClientTests  extends BaseTestContainersTest {
         Authentication authentication =
             new Authentication("user", "user@my-email.com", "xxx", "yyy");
 
-        BrokerClient client = BrokerClient.builder()
+        GitBrokerClient client = GitBrokerClient.builder()
             .serviceUrl(BROKER_TEST_ADDRESS)
             .authentication(authentication)
             .build();
@@ -174,7 +174,7 @@ public class BrokerClientTests  extends BaseTestContainersTest {
         Authentication authentication =
             new Authentication("user", "user@my-email.com", "xxx", "yyy");
 
-        BrokerClient client = BrokerClient.builder()
+        GitBrokerClient client = GitBrokerClient.builder()
             .serviceUrl(BROKER_TEST_ADDRESS)
             .authentication(authentication)
             .build();

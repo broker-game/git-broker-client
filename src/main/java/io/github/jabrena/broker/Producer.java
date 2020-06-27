@@ -9,14 +9,14 @@ public interface Producer<T> extends Closeable {
 
     String getProducerName();
 
-    String send(T message) throws BrokerClientException;
+    String send(T message) throws GitBrokerClientException;
 
     CompletableFuture<String> sendAsync(T message);
 
     long getLastSequenceId();
 
     @Override
-    void close() throws BrokerClientException;
+    void close() throws GitBrokerClientException;
 
     CompletableFuture<Void> closeAsync();
 

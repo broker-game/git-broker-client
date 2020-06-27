@@ -18,7 +18,7 @@ import java.util.stream.StreamSupport;
 import static java.util.stream.Collectors.toList;
 import static org.assertj.core.api.BDDAssertions.then;
 
-public class BrokerClientMultiThreadTests extends BaseTestContainersTest {
+public class GitBrokerClientMultiThreadTests extends BaseTestContainersTest {
 
     @Disabled
     @Tag("complex")
@@ -61,7 +61,7 @@ public class BrokerClientMultiThreadTests extends BaseTestContainersTest {
 
     private static class Client1 implements Client {
 
-        private BrokerClient client;
+        private GitBrokerClient client;
         private Producer<String> producer;
         private String TOPIC = "PING";
         private String NODE = "PING-NODE";
@@ -71,7 +71,7 @@ public class BrokerClientMultiThreadTests extends BaseTestContainersTest {
 
         public Client1() {
 
-            client = BrokerClient.builder()
+            client = GitBrokerClient.builder()
                 .serviceUrl(BROKER_TEST_ADDRESS)
                 .authentication(authentication)
                 .build();
@@ -103,14 +103,14 @@ public class BrokerClientMultiThreadTests extends BaseTestContainersTest {
     @Slf4j
     private static class Client2 implements Client {
 
-        private BrokerClient client;
+        private GitBrokerClient client;
         private Consumer<String> consumer;
         private String TOPIC = "PING";
         private String NODE = "PING-NODE";
 
         public Client2() {
 
-            client = BrokerClient.builder()
+            client = GitBrokerClient.builder()
                 .serviceUrl(BROKER_TEST_ADDRESS)
                 .authentication(new Authentication("user", "user@my-email.com", "xxx", "yyy"))
                 .build();

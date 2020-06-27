@@ -5,17 +5,15 @@
     "https://checkstyle.org/dtds/suppressions_1_2.dtd">
 
 <suppressions>
-    <suppress checks="MissingJavadocMethod" files=".*/BrokerClientTests.java" />
+    <suppress checks="MissingJavadocMethod" files=".*/GitBrokerClientTests.java" />
     <suppress checks="OverloadMethodsDeclarationOrder" files=".*/Consumer.java|
               |.*/ConsumerImpl.java" />
     <suppress checks="AbbreviationAsWordInName"
-              files=".*/BrokerClientMultiThreadTests.java|
+              files=".*/GitBrokerClientMultiThreadTests.java|
               |.*/PingPongDemoTest.java|
-              |.*/BrokerClientTests2.java|
-              |.*/BrokerClientTests.java|
-              |.*/BrokerClientConfig.java" />
+              |.*/GitBrokerClientTests.java" />
     <suppress checks="MemberName"
-              files=".*/BrokerClientMultiThreadTests.java|
+              files=".*/GitBrokerClientMultiThreadTests.java|
               |.*/PingPongDemoTest.java" />
-    <suppress checks="WhitespaceAround" files="BrokerClient.java" />
+    <suppress checks="WhitespaceAround" files="GitBrokerClient.java" />
 </suppressions>
