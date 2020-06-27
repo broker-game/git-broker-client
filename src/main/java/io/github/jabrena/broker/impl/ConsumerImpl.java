@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.github.jabrena.broker.Authentication;
 import io.github.jabrena.broker.BrokerClientException;
 import io.github.jabrena.broker.BrokerFileParser;
-import io.github.jabrena.broker.BrokerResponse;
 import io.github.jabrena.broker.Consumer;
 import io.github.jabrena.broker.GitClientWrapper;
 import io.github.jabrena.broker.LocalDirectoryWrapper;
@@ -16,7 +15,6 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.util.Arrays;
 import java.util.Iterator;
-import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.IntStream;
@@ -72,94 +70,7 @@ public class ConsumerImpl<T> implements Consumer<T> {
 
     @Override
     public Message<T> receive() throws BrokerClientException {
-        this.consume();
-
         return null;
-    }
-
-    /**
-     * consume an event stored in the Broker
-     * @return BrokerResponse
-     */
-    public BrokerResponse consume() {
-
-        var result = getFiniteStream()
-            .map(x -> {
-                gitWrapper.upgradeRepository(this.topic);
-                return x;
-            })
-            .map(x -> {
-
-                var localDirectory = this.localRepositoryWrapper.getLocalFS();
-                var counter = Arrays.stream(localDirectory.list())
-                    .filter(y -> y.indexOf(".json") != -1)
-                    .count();
-
-                //Wait
-                if (counter == 0) {
-                    return x;
-                } else {
-
-                    //Detect last checkpoints
-                    var checkPointList = Arrays.stream(localDirectory.list())
-                        .filter(y -> y.indexOf("OK.json") != -1)
-                        .sorted()
-                        .collect(toList());
-
-                    if (checkPointList.size() > 0) {
-                        var lastCheckpoint = checkPointList.get(checkPointList.size() - 1);
-                        var list = Arrays.stream(localDirectory.list())
-                            .filter(y -> y.indexOf(".json") != -1)
-                            .sorted()
-                            .dropWhile(z -> !z.equals(lastCheckpoint))
-                            .map(BrokerFileParser::new)
-                            //.filter(b -> b.getEvent().equals(event))
-                            .peek(System.out::println)
-                            .collect(toList());
-
-                        if (list.size() > 0) {
-                            LOGGER.info("Processing messages from last checkpoint: {}", lastCheckpoint);
-                            list.stream()
-                                .forEach(file -> LOGGER.info(file.toString()));
-
-                            writeCheckpoint();
-
-                            return null;
-                        } else {
-                            LOGGER.info("Without new messages from last checkpoint: {}", lastCheckpoint);
-                        }
-
-                    } else if (checkPointList.size() == 0) {
-                        var count = Arrays.stream(localDirectory.list())
-                            .filter(y -> y.indexOf(".json") != -1)
-                            .map(BrokerFileParser::new)
-                            //.filter(b -> b.getEvent().equals(event))
-                            .peek(System.out::println)
-                            .count();
-
-                        if (count > 0) {
-                            LOGGER.info("Processing messages");
-
-                            Arrays.stream(localDirectory.list())
-                                .filter(y -> y.indexOf(".json") != -1)
-                                .map(BrokerFileParser::new)
-                                .forEach(BrokerFileParser::toString);
-
-                            writeCheckpoint();
-
-                            //Break stream
-                            return null;
-                        }
-                        LOGGER.info("Without new messages from last checkpoint: {}", checkPointList);
-                    }
-                }
-                return x;
-            })
-            //.peek(System.out::println)
-            .takeWhile(Objects::nonNull)
-            .count();
-
-        return new BrokerResponse();
     }
 
     private void writeCheckpoint() {
