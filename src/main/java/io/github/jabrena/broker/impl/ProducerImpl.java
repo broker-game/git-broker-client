@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.github.jabrena.broker.Authentication;
-import io.github.jabrena.broker.BrokerClientException;
+import io.github.jabrena.broker.GitBrokerClientException;
 import io.github.jabrena.broker.GitClientWrapper;
 import io.github.jabrena.broker.LocalDirectoryWrapper;
 import io.github.jabrena.broker.Producer;
@@ -66,7 +66,7 @@ public final class ProducerImpl<T> implements Producer<T> {
     }
 
     @Override
-    public String send(T message) throws BrokerClientException {
+    public String send(T message) throws GitBrokerClientException {
 
         final String fileName = this.getFilename(this.node);
 
@@ -107,7 +107,7 @@ public final class ProducerImpl<T> implements Producer<T> {
     }
 
     @Override
-    public void close() throws BrokerClientException {
+    public void close() throws GitBrokerClientException {
 
         if (Objects.nonNull(this.localRepositoryWrapper.getLocalFS())) {
             try {

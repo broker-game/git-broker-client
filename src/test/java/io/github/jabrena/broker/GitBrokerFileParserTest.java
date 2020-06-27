@@ -4,13 +4,13 @@ import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.BDDAssertions.then;
 
-class BrokerFileParserTest {
+class GitBrokerFileParserTest {
 
     @Test
     public void given_file_when_parse_then_Ok() {
 
         String sample = "1589496032977_PING_PING.json";
-        BrokerFileParser brokerFileParser =  new BrokerFileParser(sample);
+        GitBrokerFileParser brokerFileParser =  new GitBrokerFileParser(sample);
 
         then(brokerFileParser.getEpoch()).isInstanceOf(Long.class);
     }

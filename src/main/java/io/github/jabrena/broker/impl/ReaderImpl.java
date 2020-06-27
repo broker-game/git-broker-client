@@ -1,7 +1,7 @@
 package io.github.jabrena.broker.impl;
 
-import io.github.jabrena.broker.BrokerClientException;
-import io.github.jabrena.broker.BrokerFileParser;
+import io.github.jabrena.broker.GitBrokerClientException;
+import io.github.jabrena.broker.GitBrokerFileParser;
 import io.github.jabrena.broker.GitClientWrapper;
 import io.github.jabrena.broker.LocalDirectoryWrapper;
 import io.github.jabrena.broker.Message;
@@ -21,7 +21,7 @@ public class ReaderImpl<T> implements Reader<T> {
     private final GitClientWrapper gitWrapper;
     private final String topic;
 
-    private Iterator<BrokerFileParser> list;
+    private Iterator<GitBrokerFileParser> list;
 
     /**
      * Constructor
@@ -47,7 +47,7 @@ public class ReaderImpl<T> implements Reader<T> {
             .filter(y -> y.indexOf(".json") != -1)
             .filter(y -> y.indexOf("OK.json") == -1)
             .sorted()
-            .map(BrokerFileParser::new)
+            .map(GitBrokerFileParser::new)
             .collect(toUnmodifiableList())
             .iterator();
     }
@@ -58,16 +58,16 @@ public class ReaderImpl<T> implements Reader<T> {
     }
 
     @Override
-    public Message<T> readNext() throws BrokerClientException {
+    public Message<T> readNext() throws GitBrokerClientException {
         try {
             return new MessageImpl<T>(list.next(), localRepositoryWrapper);
         } catch (NoSuchElementException e) {
-            throw new BrokerClientException(e);
+            throw new GitBrokerClientException(e);
         }
     }
 
     @Override
-    public Message<T> readNext(int timeout, TimeUnit unit) throws BrokerClientException {
+    public Message<T> readNext(int timeout, TimeUnit unit) throws GitBrokerClientException {
         return null;
     }
 
@@ -87,7 +87,7 @@ public class ReaderImpl<T> implements Reader<T> {
     }
 
     @Override
-    public boolean hasMessageAvailable() throws BrokerClientException {
+    public boolean hasMessageAvailable() throws GitBrokerClientException {
         return false;
     }
 
@@ -102,7 +102,7 @@ public class ReaderImpl<T> implements Reader<T> {
     }
 
     @Override
-    public void seek(long timestamp) throws BrokerClientException {
+    public void seek(long timestamp) throws GitBrokerClientException {
 
     }
 

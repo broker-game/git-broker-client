@@ -3,7 +3,7 @@ package io.github.jabrena.broker;
 import lombok.Data;
 
 @Data
-public class BrokerFileParser {
+public class GitBrokerFileParser {
 
     private final String raw;
     private final long epoch;
@@ -14,7 +14,7 @@ public class BrokerFileParser {
      *
      * @param fileName fileName
      */
-    public BrokerFileParser(String fileName) {
+    public GitBrokerFileParser(String fileName) {
 
         this.raw = fileName;
 

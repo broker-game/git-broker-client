@@ -8,11 +8,11 @@ public interface Consumer<T> extends Closeable {
 
     String getTopic();
 
-    Message<T> receive() throws BrokerClientException;
+    Message<T> receive() throws GitBrokerClientException;
 
     CompletableFuture<Message<T>> receiveAsync(String event);
 
-    Message<T> receive(int timeout, TimeUnit unit) throws BrokerClientException;
+    Message<T> receive(int timeout, TimeUnit unit) throws GitBrokerClientException;
 
     Messages<T> batchReceive();
 
@@ -29,6 +29,6 @@ public interface Consumer<T> extends Closeable {
     String getConsumerName();
 
     @Override
-    void close() throws BrokerClientException;
+    void close() throws GitBrokerClientException;
 
 }

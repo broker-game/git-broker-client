@@ -11,7 +11,7 @@ import java.util.Comparator;
 import java.util.Objects;
 
 @Slf4j
-public class BrokerClient {
+public class GitBrokerClient {
 
     private final LocalDirectoryWrapper localRepositoryWrapper;
     private final GitClientWrapper gitWrapper;
@@ -23,7 +23,7 @@ public class BrokerClient {
      * @param broker broker
      * @param authentication authentication
      */
-    public BrokerClient(@NonNull String broker, Authentication authentication) {
+    public GitBrokerClient(@NonNull String broker, Authentication authentication) {
 
         LOGGER.info("Creating an instance of GitBrokerClient");
 
