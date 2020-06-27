@@ -2,6 +2,7 @@ package io.github.jabrena.broker;
 
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -17,6 +18,7 @@ import static org.assertj.core.api.BDDAssertions.then;
 
 public class BrokerClientMultiThreadTests extends BaseTestContainersTest {
 
+    @Disabled
     @Tag("complex")
     @Test
     public void given_Client_when_produceAndConsumeInParallelForEvent_then_Ok() {
@@ -59,27 +61,25 @@ public class BrokerClientMultiThreadTests extends BaseTestContainersTest {
 
         private BrokerClient client;
         private Producer<String> producer;
-        private String EVENT = "PING";
+        private String TOPIC = "PING";
+        private String NODE = "PING-NODE";
 
         public Client1() {
 
             client = BrokerClient.builder()
                 .serviceUrl(BROKER_TEST_ADDRESS)
                 .authentication(new Authentication("user", "user@my-email.com", "xxx", "yyy"))
-                .node("PING-NODE")
                 .build();
 
-            //TODO Something is not necessary... Topic vs Event
             producer = client.newProducer()
-                .topic(EVENT)
-                .event(EVENT)
+                .topic(TOPIC)
+                .node(NODE)
                 .create();
         }
 
         public Integer run() {
             LOGGER.info("CLIENT 1");
 
-            sleep(2);
             IntStream.rangeClosed(1, 3).boxed()
                 .forEach(x -> {
                     sleep(3);
@@ -100,18 +100,19 @@ public class BrokerClientMultiThreadTests extends BaseTestContainersTest {
 
         private BrokerClient client;
         private Consumer consumer;
-        private String EVENT = "PING";
+        private String TOPIC = "PING";
+        private String NODE = "PING-NODE";
 
         public Client2() {
 
             client = BrokerClient.builder()
                 .serviceUrl(BROKER_TEST_ADDRESS)
                 .authentication(new Authentication("user", "user@my-email.com", "xxx", "yyy"))
-                .node("PONG-NODE")
                 .build();
 
             consumer = client.newConsumer()
-                .topic(EVENT)
+                .topic(TOPIC)
+                .node(NODE)
                 .subscribe();
         }
 
@@ -120,7 +121,7 @@ public class BrokerClientMultiThreadTests extends BaseTestContainersTest {
             IntStream.rangeClosed(1, 10)
                 .forEach(x -> {
                     LOGGER.info("{}", x);
-                    consumer.receive("PING");
+                    consumer.receive();
                     sleep(1);
                 });
             return 1;

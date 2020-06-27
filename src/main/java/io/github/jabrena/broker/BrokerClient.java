@@ -1,7 +1,5 @@
 package io.github.jabrena.broker;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 
@@ -15,76 +13,33 @@ import java.util.Objects;
 @Slf4j
 public class BrokerClient {
 
-    LocalDirectoryWrapper localRepositoryWrapper;
-    GitClientWrapper gitWrapper;
-    final BrokerClientConfig config;
-
-    //Branch
-    private final String application;
-
-    //Node
-    private final String node;
-
-    //Credentials
+    private final LocalDirectoryWrapper localRepositoryWrapper;
+    private final GitClientWrapper gitWrapper;
+    private final Authentication authentication;
     private final String broker;
-    private final String user;
-    private final String password;
-    private final String fullName;
-    private final String email;
 
     /**
      * Constructor
-     *
-     * @param broker      broker
-     * @param application application
-     * @param node        node
-     * @param fullName    fullName
-     * @param email       email
-     * @param user        user
-     * @param password    password
+     * @param broker broker
+     * @param authentication authentication
      */
-    public BrokerClient(@NonNull String broker, String application,
-                        String node, String fullName, String email, String user, String password) {
+    public BrokerClient(@NonNull String broker, Authentication authentication) {
 
-        LOGGER.info("Creating an instance of BrokerClient");
+        LOGGER.info("Creating an instance of GitBrokerClient");
 
         this.broker = broker;
-        this.application = application;
-        this.node = node;
-        this.fullName = fullName;
-        this.email = email;
-        this.user = user;
-        this.password = password;
-
+        this.authentication = authentication;
         this.localRepositoryWrapper = new LocalDirectoryWrapper();
         this.gitWrapper = new GitClientWrapper();
-        this.config = new BrokerClientConfig(broker, application, node, fullName, email, user, password);
 
         //Connect
         this.connect();
     }
 
-    /**
-     * Constructor
-     *
-     * @param config ConfigFile
-     */
-    public BrokerClient(BrokerClientConfig config) {
-        this(
-            config.getBroker(),
-            config.getApplication(),
-            config.getNode(),
-            config.getFullName(),
-            config.getEmail(),
-            config.getUser(),
-            config.getPassword()
-        );
-    }
-
     private void connect() {
 
-        localRepositoryWrapper.createLocalRepository(this.node);
-        gitWrapper.cloneRepository(localRepositoryWrapper.getLocalFS(), this.broker, this.application);
+        localRepositoryWrapper.createLocalRepository();
+        gitWrapper.cloneRepository(localRepositoryWrapper.getLocalFS(), this.broker);
     }
 
     /**
@@ -98,8 +53,7 @@ public class BrokerClient {
                     .sorted(Comparator.reverseOrder())
                     .map(Path::toFile)
                     .forEach(File::delete);
-
-                assert (!this.localRepositoryWrapper.getLocalFS().exists());
+                assert(!this.localRepositoryWrapper.getLocalFS().exists());
             } catch (IOException e) {
                 LOGGER.warn(e.getLocalizedMessage(), e);
             }
@@ -108,12 +62,12 @@ public class BrokerClient {
 
     public ProducerBuilder newProducer() {
 
-        return new ProducerBuilder(localRepositoryWrapper, gitWrapper, config);
+        return new ProducerBuilder(localRepositoryWrapper, gitWrapper, authentication);
     }
 
     public ConsumerBuilder newConsumer() {
 
-        return new ConsumerBuilder(localRepositoryWrapper, gitWrapper, config);
+        return new ConsumerBuilder(localRepositoryWrapper, gitWrapper, authentication);
     }
 
     static ClientBuilder builder() {
