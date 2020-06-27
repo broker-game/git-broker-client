@@ -8,23 +8,33 @@ public class ProducerBuilder {
 
     private final LocalDirectoryWrapper localRepositoryWrapper;
     private final GitClientWrapper gitWrapper;
-    private final BrokerClientConfig config;
+    private final Authentication authentication;
 
-    private String application;
-    private String event;
+    private String topic;
+    private String node;
 
     public ProducerBuilder topic(String topic) {
-        this.application = topic;
+        this.topic = topic;
         return this;
     }
 
-    public ProducerBuilder event(String event) {
-        this.event = event;
+    public ProducerBuilder node(String node) {
+        this.node = node;
         return this;
     }
 
+    /**
+     * Create
+     *
+     * @return Producer
+     */
     public Producer create() {
-        return new ProducerImpl(localRepositoryWrapper, gitWrapper, config, application, event);
+        return new ProducerImpl(
+            localRepositoryWrapper,
+            gitWrapper,
+            authentication,
+            topic,
+            node);
     }
 
 

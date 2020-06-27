@@ -2,6 +2,7 @@ package io.github.jabrena.broker;
 
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -10,13 +11,16 @@ import org.slf4j.LoggerFactory;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.function.BiFunction;
 import java.util.stream.IntStream;
+import java.util.stream.StreamSupport;
 
 import static java.util.stream.Collectors.toList;
 import static org.assertj.core.api.BDDAssertions.then;
 
 public class BrokerClientMultiThreadTests extends BaseTestContainersTest {
 
+    @Disabled
     @Tag("complex")
     @Test
     public void given_Client_when_produceAndConsumeInParallelForEvent_then_Ok() {
@@ -59,28 +63,29 @@ public class BrokerClientMultiThreadTests extends BaseTestContainersTest {
 
         private BrokerClient client;
         private Producer<String> producer;
-        private String EVENT = "PING";
+        private String TOPIC = "PING";
+        private String NODE = "PING-NODE";
+
+        Authentication authentication =
+            new Authentication("user", "user@my-email.com", "xxx", "yyy");
 
         public Client1() {
 
             client = BrokerClient.builder()
                 .serviceUrl(BROKER_TEST_ADDRESS)
-                .authentication(new Authentication("user", "user@my-email.com", "xxx", "yyy"))
-                .node("PING-NODE")
+                .authentication(authentication)
                 .build();
 
-            //TODO Something is not necessary... Topic vs Event
             producer = client.newProducer()
-                .topic(EVENT)
-                .event(EVENT)
+                .topic(TOPIC)
+                .node(NODE)
                 .create();
         }
 
         public Integer run() {
             LOGGER.info("CLIENT 1");
 
-            sleep(2);
-            IntStream.rangeClosed(1, 3).boxed()
+            IntStream.rangeClosed(1, 4).boxed()
                 .forEach(x -> {
                     sleep(3);
                     producer.send("Hello World " + x);
@@ -99,37 +104,43 @@ public class BrokerClientMultiThreadTests extends BaseTestContainersTest {
     private static class Client2 implements Client {
 
         private BrokerClient client;
-        private Consumer consumer;
-        private String EVENT = "PING";
+        private Consumer<String> consumer;
+        private String TOPIC = "PING";
+        private String NODE = "PING-NODE";
 
         public Client2() {
 
             client = BrokerClient.builder()
                 .serviceUrl(BROKER_TEST_ADDRESS)
                 .authentication(new Authentication("user", "user@my-email.com", "xxx", "yyy"))
-                .node("PONG-NODE")
                 .build();
 
             consumer = client.newConsumer()
-                .topic(EVENT)
+                .topic(TOPIC)
+                .node(NODE)
                 .subscribe();
         }
 
         public Integer run() {
             LOGGER.info("CLIENT 2");
-            IntStream.rangeClosed(1, 10)
-                .forEach(x -> {
-                    LOGGER.info("{}", x);
-                    consumer.receive("PING");
-                    sleep(1);
-                });
+
+            IntStream.rangeClosed(1, 5).boxed()
+                .map(x -> sleep.apply(x, 5))
+                .flatMap(x -> StreamSupport.stream(consumer.batchReceive().spliterator(), false))
+                .map(Message::getValue)
+                .forEach(LOGGER::info);
+
             return 1;
         }
 
-        @SneakyThrows
-        private void sleep(int seconds) {
-            Thread.sleep(seconds * 1000);
-        }
+        private BiFunction<Integer, Integer, Integer> sleep = (x, seconds) -> {
+            try {
+                Thread.sleep(seconds * 1000);
+            } catch (InterruptedException e) {
+                //Empty
+            }
+            return x;
+        };
     }
 
 }

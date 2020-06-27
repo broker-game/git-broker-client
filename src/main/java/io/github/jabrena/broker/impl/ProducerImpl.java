@@ -3,11 +3,12 @@ package io.github.jabrena.broker.impl;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.github.jabrena.broker.BrokerClientConfig;
+import io.github.jabrena.broker.Authentication;
 import io.github.jabrena.broker.BrokerClientException;
 import io.github.jabrena.broker.GitClientWrapper;
 import io.github.jabrena.broker.LocalDirectoryWrapper;
 import io.github.jabrena.broker.Producer;
+import lombok.NonNull;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
@@ -24,9 +25,8 @@ public final class ProducerImpl<T> implements Producer<T> {
 
     private final LocalDirectoryWrapper localRepositoryWrapper;
     private final GitClientWrapper gitWrapper;
-    private final BrokerClientConfig config;
-    private final String application;
-    private final String event;
+    private final String topic;
+    private final String node;
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
@@ -35,21 +35,24 @@ public final class ProducerImpl<T> implements Producer<T> {
      *
      * @param localRepositoryWrapper localRepositoryWrapper
      * @param gitWrapper gitWrapper
-     * @param config configuration
-     * @param application application
-     * @param event event
+     * @param authentication authentication
+     * @param topic application
+     * @param node event
      */
-    public ProducerImpl(LocalDirectoryWrapper localRepositoryWrapper, GitClientWrapper gitWrapper,
-                        BrokerClientConfig config, String application, String event) {
+    public ProducerImpl(@NonNull LocalDirectoryWrapper localRepositoryWrapper,
+                        @NonNull GitClientWrapper gitWrapper,
+                        @NonNull Authentication authentication,
+                        @NonNull String topic,
+                        @NonNull String node) {
+
         this.localRepositoryWrapper = localRepositoryWrapper;
         this.gitWrapper = gitWrapper;
-        this.config = config;
 
-        this.application = application;
-        this.event = event;
+        this.topic = topic;
+        this.node = node;
 
-
-        this.gitWrapper.checkout(this.event);
+        this.gitWrapper.setAuthentication(authentication);
+        this.gitWrapper.checkout(this.topic);
     }
 
     @Override
@@ -65,16 +68,15 @@ public final class ProducerImpl<T> implements Producer<T> {
     @Override
     public String send(T message) throws BrokerClientException {
 
-        final String fileName = this.getFilename(this.event);
+        final String fileName = this.getFilename(this.node);
 
         LOGGER.info("Producing event: {}", fileName);
 
         final String fileContent = getFileContent(message);
 
-        gitWrapper.upgradeRepository(this.application);
-        gitWrapper.addFile(this.localRepositoryWrapper.getLocalFS(), fileName, fileContent,
-            this.config.getFullName(), this.config.getEmail());
-        gitWrapper.push(this.config.getUser(), this.config.getPassword());
+        gitWrapper.upgradeRepository(this.topic);
+        gitWrapper.addFile(this.localRepositoryWrapper.getLocalFS(), fileName, fileContent);
+        gitWrapper.push();
 
         return fileName;
     }
@@ -85,8 +87,8 @@ public final class ProducerImpl<T> implements Producer<T> {
         return objectMapper.writeValueAsString(message);
     }
 
-    private String getFilename(String event) {
-        return getEpoch() + "_" + this.config.getNode() + "_" + event + ".json";
+    private String getFilename(String node) {
+        return getEpoch() + "_" + node + ".json";
     }
 
     private long getEpoch() {
@@ -96,8 +98,7 @@ public final class ProducerImpl<T> implements Producer<T> {
 
     @Override
     public CompletableFuture<String> sendAsync(T message) {
-        return CompletableFuture
-            .supplyAsync(() -> this.send(message));
+        return CompletableFuture.supplyAsync(() -> this.send(message));
     }
 
     @Override

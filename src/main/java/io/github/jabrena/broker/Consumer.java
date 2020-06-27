@@ -8,11 +8,13 @@ public interface Consumer<T> extends Closeable {
 
     String getTopic();
 
-    Message<T> receive(String event) throws BrokerClientException;
+    Message<T> receive() throws BrokerClientException;
 
     CompletableFuture<Message<T>> receiveAsync(String event);
 
     Message<T> receive(int timeout, TimeUnit unit) throws BrokerClientException;
+
+    Messages<T> batchReceive();
 
     CompletableFuture<Void> closeAsync();
 

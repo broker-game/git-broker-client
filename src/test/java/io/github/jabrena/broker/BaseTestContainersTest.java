@@ -31,6 +31,11 @@ abstract class BaseTestContainersTest {
 
     @BeforeEach
     public void before() throws IOException, InterruptedException, GitAPIException {
+
+        LOGGER.info("");
+        LOGGER.info("*************************************");
+        LOGGER.info("Initialize Git repository for testing");
+
         ExecResult result = container.execInContainer("mkrepo", "test");
         LOGGER.info(result.getStdout());
 
@@ -44,11 +49,15 @@ abstract class BaseTestContainersTest {
             createTheFirstCommit();
             first.set(false);
         }
+
+        LOGGER.info("End Git Initialization");
+        LOGGER.info("**********************");
+        LOGGER.info("");
     }
 
     private void createTheFirstCommit() throws GitAPIException, IOException {
         LocalDirectoryWrapper localDirectoryWrapper = new LocalDirectoryWrapper();
-        localDirectoryWrapper.createLocalRepository("TEMP");
+        localDirectoryWrapper.createLocalRepository();
         localDirectoryWrapper.getLocalFS();
 
         var workingDirectory = localDirectoryWrapper.getLocalFS();

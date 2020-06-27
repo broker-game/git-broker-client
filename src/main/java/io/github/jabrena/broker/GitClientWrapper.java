@@ -12,6 +12,7 @@ import org.eclipse.jgit.api.errors.InvalidRemoteException;
 import org.eclipse.jgit.api.errors.NoFilepatternException;
 import org.eclipse.jgit.api.errors.NoHeadException;
 import org.eclipse.jgit.api.errors.NoMessageException;
+import org.eclipse.jgit.api.errors.RefAlreadyExistsException;
 import org.eclipse.jgit.api.errors.RefNotAdvertisedException;
 import org.eclipse.jgit.api.errors.RefNotFoundException;
 import org.eclipse.jgit.api.errors.TransportException;
@@ -38,15 +39,15 @@ public class GitClientWrapper {
     private Git git;
 
     private String repository;
+    private Authentication authentication;
 
     /**
      * Clone a repository
      *
      * @param file file
      * @param repository repository
-     * @param branch branch
      */
-    public void cloneRepository(File file, String repository, String branch) {
+    public void cloneRepository(File file, String repository) {
 
         this.repository = repository;
 
@@ -87,6 +88,8 @@ public class GitClientWrapper {
                 .setCreateBranch(true)
                 .setName(branch)
                 .call();
+        } catch (RefAlreadyExistsException e) {
+            LOGGER.warn(e.getLocalizedMessage());
         } catch (GitAPIException e) {
             LOGGER.warn(e.getLocalizedMessage(), e);
         }
@@ -126,17 +129,15 @@ public class GitClientWrapper {
      * @param file file
      * @param fileName filename
      * @param content content
-     * @param fullName fullName
-     * @param email email
      */
-    public void addFile(File file, String fileName, String content, String fullName, String email) {
+    public void addFile(File file, String fileName, String content) {
 
         try {
             Files.writeString(file.toPath().resolve(fileName), content);
             git.add().addFilepattern(fileName).call();
             git.commit()
                 .setMessage("Creating file: " + fileName)
-                .setAuthor(fullName, email)
+                .setAuthor(this.authentication.getFullName(), this.authentication.getEmail())
                 .call();
         } catch (UnmergedPathsException |
             WrongRepositoryStateException |
@@ -155,13 +156,13 @@ public class GitClientWrapper {
 
     /**
      * Push
-     * @param user user
-     * @param password password
      */
-    public void push(String user, String password) {
+    public void push() {
 
         try {
-            CredentialsProvider cp = new UsernamePasswordCredentialsProvider(user, password);
+
+            CredentialsProvider cp = new UsernamePasswordCredentialsProvider(
+                    this.authentication.getUser(), this.authentication.getPassword());
             Iterable<PushResult> results = git.push()
                 .setRemote("origin")
                 .setCredentialsProvider(cp)
@@ -201,4 +202,9 @@ public class GitClientWrapper {
         LOGGER.info("{}", count);
 
     }
+
+    public void setAuthentication(Authentication authentication) {
+        this.authentication = authentication;
+    }
+
 }

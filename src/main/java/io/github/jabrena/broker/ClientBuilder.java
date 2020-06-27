@@ -14,14 +14,10 @@ public class ClientBuilder {
     private String password;
     private String fullName;
     private String email;
+    private Authentication authentication;
 
     public ClientBuilder serviceUrl(String broker) {
         this.broker = broker;
-        return this;
-    }
-
-    public ClientBuilder topic(String topic) {
-        this.application = topic;
         return this;
     }
 
@@ -31,10 +27,7 @@ public class ClientBuilder {
      * @return ClientBuilder
      */
     public ClientBuilder authentication(Authentication authentication) {
-        this.fullName = authentication.getFullName();
-        this.email = authentication.getEmail();
-        this.user = authentication.getUser();
-        this.password = authentication.getPassword();
+        this.authentication = authentication;
         return this;
     }
 
@@ -46,15 +39,11 @@ public class ClientBuilder {
 
         return new BrokerClient(
             this.broker,
-            this.application,
-            this.node,
-            this.fullName,
-            this.email,
-            this.user,
-            this.password
+            this.authentication
         );
     }
 
+    @Deprecated
     public ClientBuilder node(String node) {
         this.node = node;
         return this;

@@ -16,6 +16,6 @@
               |.*/BrokerClientConfig.java" />
     <suppress checks="MemberName"
               files=".*/BrokerClientMultiThreadTests.java|
-              |.*/PingPongDemoTest.java|
-              |.*/BrokerClientConfig.java" />
+              |.*/PingPongDemoTest.java" />
+    <suppress checks="WhitespaceAround" files="BrokerClient.java" />
 </suppressions>
