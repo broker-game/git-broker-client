@@ -43,4 +43,28 @@ public class ConsumerTests extends BaseTestContainersTest {
 
         client.close();
     }
+
+    @Test
+    public void given_Consumer_when_no_consume_then_Ok() {
+
+        Authentication authentication =
+            new Authentication("user", "user@my-email.com", "xxx", "yyy");
+
+        BrokerClient client = BrokerClient.builder()
+            .serviceUrl(BROKER_TEST_ADDRESS)
+            .authentication(authentication)
+            .build();
+
+        Consumer<String> consumer = client.newConsumer()
+            .topic("PINGPONG")
+            .node("PING-NODE")
+            .subscribe();
+
+        Messages<String> response = consumer.batchReceive();
+        then(StreamSupport.stream(response.spliterator(), false)
+            .count())
+            .isEqualTo(0);
+
+        client.close();
+    }
 }

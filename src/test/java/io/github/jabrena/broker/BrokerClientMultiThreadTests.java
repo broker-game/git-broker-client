@@ -9,9 +9,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.IntStream;
+import java.util.stream.StreamSupport;
 
 import static java.util.stream.Collectors.toList;
 import static org.assertj.core.api.BDDAssertions.then;
@@ -64,11 +66,14 @@ public class BrokerClientMultiThreadTests extends BaseTestContainersTest {
         private String TOPIC = "PING";
         private String NODE = "PING-NODE";
 
+        Authentication authentication =
+            new Authentication("user", "user@my-email.com", "xxx", "yyy");
+
         public Client1() {
 
             client = BrokerClient.builder()
                 .serviceUrl(BROKER_TEST_ADDRESS)
-                .authentication(new Authentication("user", "user@my-email.com", "xxx", "yyy"))
+                .authentication(authentication)
                 .build();
 
             producer = client.newProducer()
@@ -80,7 +85,7 @@ public class BrokerClientMultiThreadTests extends BaseTestContainersTest {
         public Integer run() {
             LOGGER.info("CLIENT 1");
 
-            IntStream.rangeClosed(1, 3).boxed()
+            IntStream.rangeClosed(1, 4).boxed()
                 .forEach(x -> {
                     sleep(3);
                     producer.send("Hello World " + x);
@@ -99,7 +104,7 @@ public class BrokerClientMultiThreadTests extends BaseTestContainersTest {
     private static class Client2 implements Client {
 
         private BrokerClient client;
-        private Consumer consumer;
+        private Consumer<String> consumer;
         private String TOPIC = "PING";
         private String NODE = "PING-NODE";
 
@@ -118,12 +123,38 @@ public class BrokerClientMultiThreadTests extends BaseTestContainersTest {
 
         public Integer run() {
             LOGGER.info("CLIENT 2");
-            IntStream.rangeClosed(1, 10)
-                .forEach(x -> {
+
+            /*
+            for(int x = 0; x <= 10; x++)  {
+                sleep(5);
+                LOGGER.info("{}", x);
+
+                try {
+                    Messages<String> response = consumer.batchReceive();
+                    StreamSupport.stream(response.spliterator(), false)
+                        .map(Message::getValue)
+                        .forEach(LOGGER::info);
+                } catch (NullPointerException e) {
+
+                }
+            }
+
+             */
+
+            IntStream.rangeClosed(1, 10).boxed()
+                .map(x -> {
+                    sleep(5);
                     LOGGER.info("{}", x);
-                    consumer.receive();
-                    sleep(1);
-                });
+                    return Optional.ofNullable(consumer.batchReceive());
+                })
+                //.filter(Optional::isPresent)
+                .map(Optional::get)
+                .flatMap(x -> {
+                    return StreamSupport.stream(x.spliterator(), false);
+                })
+                .map(Message::getValue)
+                .forEach(LOGGER::info);
+
             return 1;
         }
 

@@ -15,6 +15,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.util.Arrays;
 import java.util.Iterator;
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.IntStream;
@@ -126,7 +127,12 @@ public class ConsumerImpl<T> implements Consumer<T> {
 
                 @Override
                 public Iterator<Message<T>> iterator() {
-                    return null;
+                    return List.of().stream()
+                        .map(String::valueOf)
+                        .map(BrokerFileParser::new)
+                        .map(x -> (Message<T>) new MessageImpl<T>(x, localRepositoryWrapper))
+                        .collect(toUnmodifiableList())
+                        .iterator();
                 }
             };
 

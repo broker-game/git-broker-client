@@ -70,6 +70,11 @@ public class BrokerClient {
         return new ConsumerBuilder(localRepositoryWrapper, gitWrapper, authentication);
     }
 
+    public ReaderBuilder newReader() {
+
+        return new ReaderBuilder(localRepositoryWrapper, gitWrapper);
+    }
+
     static ClientBuilder builder() {
         return new ClientBuilder();
     }

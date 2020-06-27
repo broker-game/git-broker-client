@@ -1,5 +1,6 @@
 package io.github.jabrena.broker;
 
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 
 import java.util.stream.StreamSupport;
@@ -7,6 +8,7 @@ import java.util.stream.StreamSupport;
 import static org.assertj.core.api.BDDAssertions.then;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+@Slf4j
 public class BrokerClientTests  extends BaseTestContainersTest {
 
     @Test
@@ -162,6 +164,36 @@ public class BrokerClientTests  extends BaseTestContainersTest {
             .map(x -> x.getValue())
             .findFirst().get())
             .isEqualTo(expectedMessage);
+
+        client.close();
+    }
+
+    @Test
+    public void given_Client_when_call_newReader_then_Ok() {
+
+        Authentication authentication =
+            new Authentication("user", "user@my-email.com", "xxx", "yyy");
+
+        BrokerClient client = BrokerClient.builder()
+            .serviceUrl(BROKER_TEST_ADDRESS)
+            .authentication(authentication)
+            .build();
+
+        Producer<String> producer = client.newProducer()
+            .topic("PINGPONG")
+            .node("PING-NODE")
+            .create();
+
+        String expectedMessage = "Hello World";
+        producer.send(expectedMessage);
+
+        Reader<String> reader = client.newReader()
+            .topic("PINGPONG")
+            .create();
+
+        Message<String> message = reader.readNext();
+        then(message.getValue()).isEqualTo(expectedMessage);
+        then(reader.hasReachedEndOfTopic()).isTrue();
 
         client.close();
     }
