@@ -83,10 +83,6 @@ public class ConsumerImpl<T> implements Consumer<T> {
         gitWrapper.push();
     }
 
-    private Stream<Long> getFiniteStream() {
-        return IntStream.rangeClosed(1, 1).boxed().map(Long::valueOf);
-    }
-
     private String getFilename(String event) {
         return getEpoch() + "_" + this.node + "_" + event + ".json";
     }
@@ -117,25 +113,7 @@ public class ConsumerImpl<T> implements Consumer<T> {
 
         //Wait
         if (counter == 0) {
-
-            return new Messages<T>() {
-
-                @Override
-                public int size() {
-                    return 0;
-                }
-
-                @Override
-                public Iterator<Message<T>> iterator() {
-                    return List.of().stream()
-                        .map(String::valueOf)
-                        .map(BrokerFileParser::new)
-                        .map(x -> (Message<T>) new MessageImpl<T>(x, localRepositoryWrapper))
-                        .collect(toUnmodifiableList())
-                        .iterator();
-                }
-            };
-
+            return emptyMessages();
         } else {
 
             //Detect last checkpoints
@@ -145,11 +123,13 @@ public class ConsumerImpl<T> implements Consumer<T> {
                 .collect(toList());
 
             if (checkPointList.size() > 0) {
+
                 var lastCheckpoint = checkPointList.get(checkPointList.size() - 1);
                 var list = Arrays.stream(localDirectory.list())
                     .filter(y -> y.indexOf(".json") != -1)
                     .sorted()
                     .dropWhile(z -> !z.equals(lastCheckpoint))
+                    .filter(y -> y.indexOf("OK.json") == -1)
                     .map(BrokerFileParser::new)
                     //.filter(b -> b.getEvent().equals(event))
                     .peek(System.out::println)
@@ -178,6 +158,7 @@ public class ConsumerImpl<T> implements Consumer<T> {
                     };
                 } else {
                     LOGGER.info("Without new messages from last checkpoint: {}", lastCheckpoint);
+                    return emptyMessages();
                 }
 
             } else if (checkPointList.size() == 0) {
@@ -220,7 +201,28 @@ public class ConsumerImpl<T> implements Consumer<T> {
             }
         }
 
-        return null;
+        return emptyMessages();
+    }
+
+    private Messages<T> emptyMessages() {
+
+        return new Messages<T>() {
+
+            @Override
+            public int size() {
+                return 0;
+            }
+
+            @Override
+            public Iterator<Message<T>> iterator() {
+                return List.of().stream()
+                    .map(String::valueOf)
+                    .map(BrokerFileParser::new)
+                    .map(x -> (Message<T>) new MessageImpl<T>(x, localRepositoryWrapper))
+                    .collect(toUnmodifiableList())
+                    .iterator();
+            }
+        };
     }
 
     @Override

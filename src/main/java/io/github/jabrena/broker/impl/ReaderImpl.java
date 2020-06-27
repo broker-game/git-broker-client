@@ -45,6 +45,7 @@ public class ReaderImpl<T> implements Reader<T> {
         var localDirectory = this.localRepositoryWrapper.getLocalFS();
         list = Arrays.stream(localDirectory.list())
             .filter(y -> y.indexOf(".json") != -1)
+            .filter(y -> y.indexOf("OK.json") == -1)
             .sorted()
             .map(BrokerFileParser::new)
             .collect(toUnmodifiableList())

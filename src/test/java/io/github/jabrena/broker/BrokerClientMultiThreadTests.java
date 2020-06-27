@@ -9,9 +9,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.function.BiFunction;
 import java.util.stream.IntStream;
 import java.util.stream.StreamSupport;
 
@@ -124,44 +124,23 @@ public class BrokerClientMultiThreadTests extends BaseTestContainersTest {
         public Integer run() {
             LOGGER.info("CLIENT 2");
 
-            /*
-            for(int x = 0; x <= 10; x++)  {
-                sleep(5);
-                LOGGER.info("{}", x);
-
-                try {
-                    Messages<String> response = consumer.batchReceive();
-                    StreamSupport.stream(response.spliterator(), false)
-                        .map(Message::getValue)
-                        .forEach(LOGGER::info);
-                } catch (NullPointerException e) {
-
-                }
-            }
-
-             */
-
-            IntStream.rangeClosed(1, 10).boxed()
-                .map(x -> {
-                    sleep(5);
-                    LOGGER.info("{}", x);
-                    return Optional.ofNullable(consumer.batchReceive());
-                })
-                //.filter(Optional::isPresent)
-                .map(Optional::get)
-                .flatMap(x -> {
-                    return StreamSupport.stream(x.spliterator(), false);
-                })
+            IntStream.rangeClosed(1, 5).boxed()
+                .map(x -> sleep.apply(x, 5))
+                .flatMap(x -> StreamSupport.stream(consumer.batchReceive().spliterator(), false))
                 .map(Message::getValue)
                 .forEach(LOGGER::info);
 
             return 1;
         }
 
-        @SneakyThrows
-        private void sleep(int seconds) {
-            Thread.sleep(seconds * 1000);
-        }
+        private BiFunction<Integer, Integer, Integer> sleep = (x, seconds) -> {
+            try {
+                Thread.sleep(seconds * 1000);
+            } catch (InterruptedException e) {
+                //Empty
+            }
+            return x;
+        };
     }
 
 }
