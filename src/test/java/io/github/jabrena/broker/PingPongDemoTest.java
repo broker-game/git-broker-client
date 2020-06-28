@@ -30,7 +30,7 @@ public class PingPongDemoTest extends BaseTestContainersTest {
         final int iterations = 5;
 
         var playerList = List.of(
-            new Player(TOPIC1,TOPIC2, NODE, iterations),
+            new Player(TOPIC1, TOPIC2, NODE, iterations),
             new Player(TOPIC2, TOPIC1, NODE2, iterations));
         var futureRequests = playerList.stream()
             .map(Client::runAsync)
@@ -66,11 +66,13 @@ public class PingPongDemoTest extends BaseTestContainersTest {
         }
         LOGGER.info("{}", counter);
         int expectedMessages = iterations * 2;
-        then(counter).isBetween(expectedMessages -1, expectedMessages);
+        then(counter).isBetween(expectedMessages - 1, expectedMessages);
     }
 
     private interface Client {
+
         Integer run();
+
         CompletableFuture<Integer> runAsync();
     }
 
