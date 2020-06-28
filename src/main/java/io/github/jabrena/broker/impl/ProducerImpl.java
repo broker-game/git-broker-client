@@ -25,6 +25,8 @@ public final class ProducerImpl<T> implements Producer<T> {
 
     private final LocalDirectoryWrapper localRepositoryWrapper;
     private final GitClientWrapper gitWrapper;
+
+    private final String broker;
     private final String topic;
     private final String node;
 
@@ -33,24 +35,24 @@ public final class ProducerImpl<T> implements Producer<T> {
     /**
      * Constructor
      *
-     * @param localRepositoryWrapper localRepositoryWrapper
-     * @param gitWrapper gitWrapper
      * @param authentication authentication
      * @param topic application
      * @param node event
      */
-    public ProducerImpl(@NonNull LocalDirectoryWrapper localRepositoryWrapper,
-                        @NonNull GitClientWrapper gitWrapper,
+    public ProducerImpl(@NonNull String broker,
                         @NonNull Authentication authentication,
                         @NonNull String topic,
                         @NonNull String node) {
 
-        this.localRepositoryWrapper = localRepositoryWrapper;
-        this.gitWrapper = gitWrapper;
+        this.localRepositoryWrapper = new LocalDirectoryWrapper();
+        this.gitWrapper = new GitClientWrapper();
 
+        this.broker = broker;
         this.topic = topic;
         this.node = node;
 
+        this.localRepositoryWrapper.createLocalRepository();
+        this.gitWrapper.cloneRepository(localRepositoryWrapper.getLocalFS(), this.broker);
         this.gitWrapper.setAuthentication(authentication);
         this.gitWrapper.checkout(this.topic);
     }

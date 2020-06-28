@@ -78,6 +78,7 @@ public class PingPongDemoTest extends BaseTestContainersTest {
         then(results.stream().count()).isEqualTo(2);
 
         verify(TOPIC1, iterations);
+        verify(TOPIC2, iterations);
     }
 
     private void verify(String TOPIC, int iterations) {
@@ -100,8 +101,7 @@ public class PingPongDemoTest extends BaseTestContainersTest {
             counter++;
         }
         LOGGER.info("{}", counter);
-        int expectedMessages = iterations * 2;
-        then(counter).isBetween(expectedMessages -1, expectedMessages);
+        then(counter).isBetween(iterations - 1, iterations);
     }
 
     private interface Client {

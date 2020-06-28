@@ -3,25 +3,14 @@ package io.github.jabrena.broker.impl;
 import io.github.jabrena.broker.Authentication;
 import io.github.jabrena.broker.ConsumerBuilder;
 import io.github.jabrena.broker.GitBrokerClient;
-import io.github.jabrena.broker.GitClientWrapper;
-import io.github.jabrena.broker.LocalDirectoryWrapper;
 import io.github.jabrena.broker.ProducerBuilder;
 import io.github.jabrena.broker.ReaderBuilder;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.Comparator;
-import java.util.Objects;
-
 @Slf4j
 public class GitBrokerClientImpl implements GitBrokerClient {
 
-    private final LocalDirectoryWrapper localRepositoryWrapper;
-    private final GitClientWrapper gitWrapper;
     private final Authentication authentication;
     private final String broker;
 
@@ -36,17 +25,6 @@ public class GitBrokerClientImpl implements GitBrokerClient {
 
         this.broker = broker;
         this.authentication = authentication;
-        this.localRepositoryWrapper = new LocalDirectoryWrapper();
-        this.gitWrapper = new GitClientWrapper();
-
-        //Connect
-        this.connect();
-    }
-
-    private void connect() {
-
-        localRepositoryWrapper.createLocalRepository();
-        gitWrapper.cloneRepository(localRepositoryWrapper.getLocalFS(), this.broker);
     }
 
     /**
@@ -55,6 +33,8 @@ public class GitBrokerClientImpl implements GitBrokerClient {
     @Override
     public void close() {
 
+        //TODO find a solution to close all objects provided
+        /*
         if (Objects.nonNull(this.localRepositoryWrapper.getLocalFS())) {
             try {
                 Files.walk(this.localRepositoryWrapper.getLocalFS().toPath())
@@ -66,24 +46,25 @@ public class GitBrokerClientImpl implements GitBrokerClient {
                 LOGGER.warn(e.getLocalizedMessage(), e);
             }
         }
+         */
     }
 
     @Override
     public ProducerBuilder newProducer() {
 
-        return new ProducerBuilder(localRepositoryWrapper, gitWrapper, authentication);
+        return new ProducerBuilder(broker, authentication);
     }
 
     @Override
     public ConsumerBuilder newConsumer() {
 
-        return new ConsumerBuilder(localRepositoryWrapper, gitWrapper, authentication);
+        return new ConsumerBuilder(broker, authentication);
     }
 
     @Override
     public ReaderBuilder newReader() {
 
-        return new ReaderBuilder(localRepositoryWrapper, gitWrapper);
+        return new ReaderBuilder(broker);
     }
 
 }
