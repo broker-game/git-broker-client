@@ -27,18 +27,19 @@ which offer `free` git accounts to store the code.
 
 ## What components are common in a Streaming platform?
 
-- The publisher
+- The producer
 - The consumer
-- The partitions
-- The events
+- The reader
 - The topics
+- The partitions
 
 ![](docs/kafka-example.png)
 
 ## Features included with the client:
 
-- Publish Events
-- Consume Events
+- Produce Messages
+- Consume Messages
+- Read Messages
 - Initial partition support
 
 ## Limitations:

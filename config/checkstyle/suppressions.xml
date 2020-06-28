@@ -8,6 +8,7 @@
     <suppress checks="MissingJavadocMethod" files=".*/GitBrokerClientTests.java" />
     <suppress checks="OverloadMethodsDeclarationOrder" files=".*/Consumer.java|
               |.*/ConsumerImpl.java" />
+    <suppress checks="ParameterName" files=".*/PingPongDemoTest.java" />
     <suppress checks="AbbreviationAsWordInName"
               files=".*/GitBrokerClientMultiThreadTests.java|
               |.*/PingPongDemoTest.java|
@@ -15,5 +16,5 @@
     <suppress checks="MemberName"
               files=".*/GitBrokerClientMultiThreadTests.java|
               |.*/PingPongDemoTest.java" />
-    <suppress checks="WhitespaceAround" files="GitBrokerClient.java" />
+    <suppress checks="WhitespaceAround" files=".*/GitBrokerClientImpl.java" />
 </suppressions>
