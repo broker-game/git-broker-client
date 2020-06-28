@@ -48,13 +48,25 @@ which offer `free` git accounts to store the code.
 ## Examples
 
 ``` java
+
 @Slf4j
 public class PingPongDemoTest extends BaseTestContainersTest {
 
+    @Disabled
+    @Tag("complex")
     @Test
     public void given_PingPongGame_when_execute_then_Ok() {
 
-        var futureRequests = List.of(new Game(), new Ping(), new Pong()).stream()
+        final String TOPIC1 = "PING";
+        final String TOPIC2 = "PONG";
+        final String NODE = TOPIC1 + "-NODE";
+        final String NODE2 = TOPIC2 + "-NODE";
+        final int iterations = 5;
+
+        var playerList = List.of(
+            new Player(TOPIC1,TOPIC2, NODE, iterations),
+            new Player(TOPIC2, TOPIC1, NODE2, iterations));
+        var futureRequests = playerList.stream()
             .map(Client::runAsync)
             .collect(toList());
 
@@ -62,14 +74,19 @@ public class PingPongDemoTest extends BaseTestContainersTest {
             .map(CompletableFuture::join)
             .collect(toList());
 
-        then(results.stream().count()).isEqualTo(3);
+        then(results.stream().count()).isEqualTo(2);
+
+        verify(TOPIC1, iterations);
+    }
+
+    private void verify(String TOPIC, int iterations) {
 
         GitBrokerClient client = GitBrokerClient.builder()
             .serviceUrl(BROKER_TEST_ADDRESS)
             .build();
 
         Reader<String> reader = client.newReader()
-            .topic("PING")
+            .topic(TOPIC)
             .create();
 
         int counter = 0;
@@ -82,167 +99,88 @@ public class PingPongDemoTest extends BaseTestContainersTest {
             counter++;
         }
         LOGGER.info("{}", counter);
-        then(counter).isBetween(9, 11);
+        int expectedMessages = iterations * 2;
+        then(counter).isBetween(expectedMessages -1, expectedMessages);
     }
 
     private interface Client {
-
-        Logger LOGGER = LoggerFactory.getLogger(Client.class);
-
         Integer run();
+        CompletableFuture<Integer> runAsync();
+    }
 
-        default CompletableFuture<Integer> runAsync() {
+    private static class Player implements Client {
+
+        private final String TOPIC_PRODUCE;
+        private final String TOPIC_CONSUME;
+        private final String NODE;
+        private final int iterations;
+
+        private final GitBrokerClient client;
+        private final Producer<String> producer;
+        private final Consumer<String> consumer;
+
+        private final Authentication authentication =
+            new Authentication("user", "user@my-email.com", "xxx", "yyy");
+
+        public Player(
+            @NonNull String topicProduce,
+            @NonNull String topicConsume,
+            @NonNull String node,
+            @NonNull int iterations) {
+
+            this.TOPIC_PRODUCE = topicProduce;
+            this.TOPIC_CONSUME = topicConsume;
+            this.NODE = node;
+            this.iterations = iterations;
+
+            client = GitBrokerClient.builder()
+                .serviceUrl(BROKER_TEST_ADDRESS)
+                .authentication(authentication)
+                .build();
+
+            producer = client.newProducer()
+                .topic(TOPIC_PRODUCE)
+                .node(NODE)
+                .create();
+
+            consumer = client.newConsumer()
+                .topic(TOPIC_CONSUME)
+                .node(NODE)
+                .subscribe();
+        }
+
+        @Override
+        public Integer run() {
+            LOGGER.info(TOPIC_PRODUCE);
+
+            IntStream.rangeClosed(1, iterations)
+                .forEach(x -> {
+                    LOGGER.info("Iteration {}: {}", TOPIC_PRODUCE, x);
+                    consumer.batchReceive();
+                    producer.send(TOPIC_PRODUCE);
+                });
+
+            return 1;
+        }
+
+        @Override
+        public CompletableFuture<Integer> runAsync() {
 
             LOGGER.info("Thread: {}", Thread.currentThread().getName());
             CompletableFuture<Integer> future = CompletableFuture
                 .supplyAsync(() -> run())
-                .exceptionally(ex -> {
-                    LOGGER.error(ex.getLocalizedMessage(), ex);
-                    return 0;
-                })
-                .completeOnTimeout(0, 60, TimeUnit.SECONDS);
-
+                .orTimeout(60, TimeUnit.SECONDS)
+                .handle((response, ex) -> {
+                    if (!Objects.isNull(ex)) {
+                        LOGGER.error(ex.getLocalizedMessage(), ex);
+                    }
+                    return response;
+                });
             return future;
         }
     }
-
-    private static class Ping implements Client {
-
-        private final String TOPIC_PRODUCE = "PING";
-        private final String TOPIC_CONSUME = "PONG";
-        private final String NODE = "PING-NODE";
-
-        private GitBrokerClient client;
-        private Producer<String> producer;
-        private Consumer<String> consumer;
-
-        Authentication authentication =
-            new Authentication("user", "user@my-email.com", "xxx", "yyy");
-
-        public Ping() {
-
-            client = GitBrokerClient.builder()
-                .serviceUrl(BROKER_TEST_ADDRESS)
-                .authentication(authentication)
-                .build();
-
-            producer = client.newProducer()
-                .topic(TOPIC_PRODUCE)
-                .node(NODE)
-                .create();
-
-            consumer = client.newConsumer()
-                .topic(TOPIC_CONSUME)
-                .node(NODE)
-                .subscribe();
-        }
-
-        @Override
-        public Integer run() {
-            LOGGER.info("Ping");
-
-            IntStream.rangeClosed(1, 5)
-                .forEach(x -> {
-                    LOGGER.info("Iteration Ping: {}", x);
-                    consumer.batchReceive();
-                    producer.send("Ping");
-                });
-
-            return 1;
-        }
-
-    }
-
-    private static class Pong implements Client {
-
-        private final String TOPIC_PRODUCE = "PONG";
-        private final String TOPIC_CONSUME = "PING";
-        private final String NODE = "PONG-NODE";
-
-        private GitBrokerClient client;
-        private Producer<String> producer;
-        private Consumer<String> consumer;
-
-        Authentication authentication =
-            new Authentication("user", "user@my-email.com", "xxx", "yyy");
-
-        public Pong() {
-
-            client = GitBrokerClient.builder()
-                .serviceUrl(BROKER_TEST_ADDRESS)
-                .authentication(authentication)
-                .build();
-
-            producer = client.newProducer()
-                .topic(TOPIC_PRODUCE)
-                .node(NODE)
-                .create();
-
-            consumer = client.newConsumer()
-                .topic(TOPIC_CONSUME)
-                .node(NODE)
-                .subscribe();
-        }
-
-        @Override
-        public Integer run() {
-            LOGGER.info("Pong");
-
-            IntStream.rangeClosed(1, 5)
-                .forEach(x -> {
-                    LOGGER.info("Iteration Pong: {}", x);
-                    consumer.batchReceive();
-                    producer.send("Pong");
-                });
-
-            return 1;
-        }
-
-    }
-
-    private static class Game implements Client {
-
-        private final String TOPIC_PRODUCE = "PING";
-        private final String NODE = "GAME-NODE";
-
-        private GitBrokerClient client;
-        private Producer<String> producer;
-
-        Authentication authentication =
-            new Authentication("user", "user@my-email.com", "xxx", "yyy");
-
-        public Game() {
-
-            client = GitBrokerClient.builder()
-                .serviceUrl(BROKER_TEST_ADDRESS)
-                .authentication(authentication)
-                .build();
-
-            producer = client.newProducer()
-                .topic(TOPIC_PRODUCE)
-                .node(NODE)
-                .create();
-        }
-
-        @Override
-        public Integer run() {
-            LOGGER.info("Game");
-
-            sleep(10);
-            producer.send("Game");
-
-            return 1;
-        }
-
-        @SneakyThrows
-        private void sleep(int seconds) {
-            Thread.sleep(seconds * 1000);
-        }
-
-    }
-
-
 }
+
 
 ```
 
