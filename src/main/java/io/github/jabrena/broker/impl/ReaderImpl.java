@@ -19,26 +19,31 @@ public class ReaderImpl<T> implements Reader<T> {
 
     private final LocalDirectoryWrapper localRepositoryWrapper;
     private final GitClientWrapper gitWrapper;
+
+    private final String broker;
     private final String topic;
 
     private Iterator<GitBrokerFileParser> list;
 
     /**
      * Constructor
-     * @param localRepositoryWrapper localRepositoryWrapper
-     * @param gitWrapper gitWrapper
+     *
      * @param topic topic
      */
-    public ReaderImpl(LocalDirectoryWrapper localRepositoryWrapper, GitClientWrapper gitWrapper, String topic) {
+    public ReaderImpl(String broker, String topic) {
 
-        this.localRepositoryWrapper = localRepositoryWrapper;
-        this.gitWrapper = gitWrapper;
+        this.localRepositoryWrapper = new LocalDirectoryWrapper();
+        this.gitWrapper = new GitClientWrapper();
+
+        this.broker = broker;
         this.topic = topic;
 
         init();
     }
 
     private void init() {
+        this.localRepositoryWrapper.createLocalRepository();
+        this.gitWrapper.cloneRepository(localRepositoryWrapper.getLocalFS(), this.broker);
         this.gitWrapper.checkout(this.topic);
         this.gitWrapper.upgradeRepository(this.topic);
 

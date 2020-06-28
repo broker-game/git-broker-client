@@ -1,6 +1,5 @@
 package io.github.jabrena.broker.impl;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.github.jabrena.broker.Authentication;
 import io.github.jabrena.broker.GitBrokerClientException;
 import io.github.jabrena.broker.GitBrokerFileParser;
@@ -29,35 +28,31 @@ public class ConsumerImpl<T> implements Consumer<T> {
     private final LocalDirectoryWrapper localRepositoryWrapper;
     private final GitClientWrapper gitWrapper;
 
-    @NonNull
+    private final String broker;
     private final String topic;
-
-    @NonNull
     private final String node;
-
-    private final ObjectMapper objectMapper = new ObjectMapper();
 
     /**
      * Constructor
      *
-     * @param localRepositoryWrapper localRepositoryWrapper
-     * @param gitWrapper gitWrapper
      * @param authentication authentication
      * @param topic application
      * @param node event
      */
-    public ConsumerImpl(@NonNull LocalDirectoryWrapper localRepositoryWrapper,
-                        @NonNull GitClientWrapper gitWrapper,
+    public ConsumerImpl(@NonNull String broker,
                         @NonNull Authentication authentication,
                         @NonNull String topic,
                         @NonNull String node) {
 
-        this.localRepositoryWrapper = localRepositoryWrapper;
-        this.gitWrapper = gitWrapper;
+        this.localRepositoryWrapper = new LocalDirectoryWrapper();
+        this.gitWrapper = new GitClientWrapper();
 
+        this.broker = broker;
         this.topic = topic;
         this.node = node;
 
+        this.localRepositoryWrapper.createLocalRepository();
+        this.gitWrapper.cloneRepository(localRepositoryWrapper.getLocalFS(), this.broker);
         this.gitWrapper.setAuthentication(authentication);
         this.gitWrapper.checkout(this.topic);
     }

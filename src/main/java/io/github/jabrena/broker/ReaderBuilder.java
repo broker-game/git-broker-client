@@ -6,8 +6,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class ReaderBuilder {
 
-    private final LocalDirectoryWrapper localRepositoryWrapper;
-    private final GitClientWrapper gitWrapper;
+    private final String broker;
 
     private String topic;
 
@@ -18,6 +17,6 @@ public class ReaderBuilder {
 
     public Reader create() {
 
-        return new ReaderImpl(localRepositoryWrapper, gitWrapper, topic);
+        return new ReaderImpl(broker, topic);
     }
 }

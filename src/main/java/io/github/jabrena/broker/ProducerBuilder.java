@@ -6,8 +6,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class ProducerBuilder {
 
-    private final LocalDirectoryWrapper localRepositoryWrapper;
-    private final GitClientWrapper gitWrapper;
+    private final String broker;
     private final Authentication authentication;
 
     private String topic;
@@ -30,8 +29,7 @@ public class ProducerBuilder {
      */
     public Producer create() {
         return new ProducerImpl(
-            localRepositoryWrapper,
-            gitWrapper,
+            broker,
             authentication,
             topic,
             node);

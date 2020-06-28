@@ -6,8 +6,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class ConsumerBuilder {
 
-    private final LocalDirectoryWrapper localRepositoryWrapper;
-    private final GitClientWrapper gitWrapper;
+    private final String broker;
     private final Authentication authentication;
 
     private String topic;
@@ -24,6 +23,6 @@ public class ConsumerBuilder {
     }
 
     public Consumer subscribe() {
-        return new ConsumerImpl(localRepositoryWrapper, gitWrapper, authentication, topic, node);
+        return new ConsumerImpl(broker, authentication, topic, node);
     }
 }

@@ -1,6 +1,7 @@
 package io.github.jabrena.broker;
 
 import lombok.extern.slf4j.Slf4j;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.util.stream.StreamSupport;
@@ -70,6 +71,7 @@ public class ConsumerTests extends BaseTestContainersTest {
         client.close();
     }
 
+    @Disabled
     @Test
     public void given_Consumer_when_consume_multiple_times_then_Ok() {
 
@@ -110,6 +112,7 @@ public class ConsumerTests extends BaseTestContainersTest {
 
         producer.send(expectedMessage);
         producer.send(expectedMessage);
+
         Messages<String> response4 = consumer.batchReceive();
         then(StreamSupport.stream(response4.spliterator(), false)
             .count())
