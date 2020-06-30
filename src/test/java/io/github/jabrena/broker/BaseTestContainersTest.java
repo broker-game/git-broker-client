@@ -14,14 +14,12 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 @Slf4j
 @Testcontainers
 abstract class BaseTestContainersTest {
 
     protected static String BROKER_TEST_ADDRESS;
-    private static AtomicBoolean first = new AtomicBoolean(true);
 
     @Container
     protected GenericContainer<?> container = new GenericContainer<>("jabrena/git-server:latest")
@@ -45,10 +43,7 @@ abstract class BaseTestContainersTest {
         BROKER_TEST_ADDRESS = "http://" + ip + ":" + port + "/test.git";
         LOGGER.info(BROKER_TEST_ADDRESS);
 
-        if (first.get()) {
-            createTheFirstCommit();
-            first.set(false);
-        }
+        createTheFirstCommit();
 
         LOGGER.info("End Git Initialization");
         LOGGER.info("**********************");
