@@ -49,36 +49,31 @@ which offer `free` git accounts to store the code.
 ## Examples
 
 ``` java
-
 @Slf4j
 public class PingPongDemoTest extends BaseTestContainersTest {
 
-    @Disabled
     @Tag("complex")
     @Test
-    public void given_PingPongGame_when_execute_then_Ok() {
+    public void given_PingPong_when_execute_then_Ok() {
 
-        final String TOPIC1 = "PING";
-        final String TOPIC2 = "PONG";
-        final String NODE = TOPIC1 + "-NODE";
-        final String NODE2 = TOPIC2 + "-NODE";
+        final String topic1 = "PING";
+        final String topic2 = "PONG";
         final int iterations = 5;
+        final int timeout = 60;
 
-        var playerList = List.of(
-            new Player(TOPIC1,TOPIC2, NODE, iterations),
-            new Player(TOPIC2, TOPIC1, NODE2, iterations));
-        var futureRequests = playerList.stream()
-            .map(Client::runAsync)
+        var playersList = List.of(
+            new Player(topic1, topic2, iterations, timeout),
+            new Player(topic2, topic1, iterations, timeout));
+        var futureRequests = playersList.stream()
+            .map(Player::runAsync)
             .collect(toList());
-
         var results = futureRequests.stream()
             .map(CompletableFuture::join)
-            .collect(toList());
+            .reduce(0L, (x1, x2) -> x1 + x2);
 
-        then(results.stream().count()).isEqualTo(2);
-
-        verify(TOPIC1, iterations);
-        verify(TOPIC2, iterations);
+        then(results).isEqualTo((iterations - 1) * 2);
+        verify(topic1, iterations);
+        verify(topic2, iterations);
     }
 
     private void verify(String TOPIC, int iterations) {
@@ -101,24 +96,26 @@ public class PingPongDemoTest extends BaseTestContainersTest {
             counter++;
         }
         LOGGER.info("{}", counter);
-        then(counter).isBetween(iterations - 1, iterations);
+        then(counter).isEqualTo(iterations);
     }
 
-    private interface Client {
-        Integer run();
-        CompletableFuture<Integer> runAsync();
+    private interface Client<T> {
+
+        T run();
+
+        CompletableFuture<T> runAsync();
     }
 
-    private static class Player implements Client {
+    private static class Player implements Client<Long> {
 
         private final String TOPIC_PRODUCE;
         private final String TOPIC_CONSUME;
-        private final String NODE;
         private final int iterations;
 
         private final GitBrokerClient client;
         private final Producer<String> producer;
         private final Consumer<String> consumer;
+        private final int timeout;
 
         private final Authentication authentication =
             new Authentication("user", "user@my-email.com", "xxx", "yyy");
@@ -126,13 +123,13 @@ public class PingPongDemoTest extends BaseTestContainersTest {
         public Player(
             @NonNull String topicProduce,
             @NonNull String topicConsume,
-            @NonNull String node,
-            @NonNull int iterations) {
+            @NonNull int iterations,
+            @NonNull int timeout) {
 
             this.TOPIC_PRODUCE = topicProduce;
             this.TOPIC_CONSUME = topicConsume;
-            this.NODE = node;
             this.iterations = iterations;
+            this.timeout = timeout;
 
             client = GitBrokerClient.builder()
                 .serviceUrl(BROKER_TEST_ADDRESS)
@@ -141,36 +138,33 @@ public class PingPongDemoTest extends BaseTestContainersTest {
 
             producer = client.newProducer()
                 .topic(TOPIC_PRODUCE)
-                .node(NODE)
                 .create();
 
             consumer = client.newConsumer()
                 .topic(TOPIC_CONSUME)
-                .node(NODE)
                 .subscribe();
         }
 
         @Override
-        public Integer run() {
+        public Long run() {
             LOGGER.info(TOPIC_PRODUCE);
-
-            IntStream.rangeClosed(1, iterations)
-                .forEach(x -> {
+            return IntStream.rangeClosed(1, iterations).boxed()
+                .mapToLong(x -> {
                     LOGGER.info("Iteration {}: {}", TOPIC_PRODUCE, x);
-                    consumer.batchReceive();
+                    Messages<String> messages = consumer.batchReceive();
                     producer.send(TOPIC_PRODUCE);
-                });
-
-            return 1;
+                    return StreamSupport.stream(messages.spliterator(), false).count();
+                })
+                .reduce(0L, (x, y) -> x + y);
         }
 
         @Override
-        public CompletableFuture<Integer> runAsync() {
+        public CompletableFuture<Long> runAsync() {
 
             LOGGER.info("Thread: {}", Thread.currentThread().getName());
-            CompletableFuture<Integer> future = CompletableFuture
+            CompletableFuture<Long> future = CompletableFuture
                 .supplyAsync(() -> run())
-                .orTimeout(60, TimeUnit.SECONDS)
+                .orTimeout(this.timeout, TimeUnit.SECONDS)
                 .handle((response, ex) -> {
                     if (!Objects.isNull(ex)) {
                         LOGGER.error(ex.getLocalizedMessage(), ex);
@@ -181,8 +175,6 @@ public class PingPongDemoTest extends BaseTestContainersTest {
         }
     }
 }
-
-
 ```
 
 ## JDK Requeriments in EV3
