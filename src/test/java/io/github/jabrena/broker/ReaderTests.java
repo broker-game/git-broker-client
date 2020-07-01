@@ -43,7 +43,6 @@ public class ReaderTests extends BaseTestContainersTest {
 
         Producer<String> producer = client.newProducer()
             .topic("PINGPONG")
-            .node("PING-NODE")
             .create();
 
         String expectedMessage = "Hello World";

@@ -42,7 +42,7 @@ public final class ProducerImpl<T> implements Producer<T> {
     public ProducerImpl(@NonNull String broker,
                         @NonNull Authentication authentication,
                         @NonNull String topic,
-                        @NonNull String node) {
+                        String node) {
 
         this.localRepositoryWrapper = new LocalDirectoryWrapper();
         this.gitWrapper = new GitClientWrapper();
@@ -70,8 +70,12 @@ public final class ProducerImpl<T> implements Producer<T> {
     @Override
     public String send(T message) throws GitBrokerClientException {
 
-        final String fileName = this.getFilename(this.node);
-
+        String fileName;
+        if (Objects.isNull(this.node)) {
+            fileName = this.getFilename();
+        } else {
+            fileName = this.getFilename(this.node);
+        }
         LOGGER.info("Producing event: {}", fileName);
 
         final String fileContent = getFileContent(message);
@@ -91,6 +95,10 @@ public final class ProducerImpl<T> implements Producer<T> {
 
     private String getFilename(String node) {
         return getEpoch() + "_" + node + ".json";
+    }
+
+    private String getFilename() {
+        return getEpoch() + ".json";
     }
 
     private long getEpoch() {

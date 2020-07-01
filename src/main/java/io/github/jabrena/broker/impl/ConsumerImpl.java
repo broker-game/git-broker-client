@@ -15,6 +15,7 @@ import lombok.extern.slf4j.Slf4j;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
@@ -42,7 +43,7 @@ public class ConsumerImpl<T> implements Consumer<T> {
     public ConsumerImpl(@NonNull String broker,
                         @NonNull Authentication authentication,
                         @NonNull String topic,
-                        @NonNull String node) {
+                        String node) {
 
         this.localRepositoryWrapper = new LocalDirectoryWrapper();
         this.gitWrapper = new GitClientWrapper();
@@ -77,6 +78,9 @@ public class ConsumerImpl<T> implements Consumer<T> {
     }
 
     private String getFilename(String event) {
+        if (Objects.isNull(this.node)) {
+            return getEpoch() + "_" + event + ".json";
+        }
         return getEpoch() + "_" + this.node + "_" + event + ".json";
     }
 
@@ -124,8 +128,7 @@ public class ConsumerImpl<T> implements Consumer<T> {
                     .dropWhile(z -> !z.equals(lastCheckpoint))
                     .filter(y -> y.indexOf("OK.json") == -1)
                     .map(GitBrokerFileParser::new)
-                    //.filter(b -> b.getEvent().equals(event))
-                    .peek(System.out::println)
+                    //.peek(System.out::println)
                     .collect(toList());
 
                 if (list.size() > 0) {
@@ -159,7 +162,6 @@ public class ConsumerImpl<T> implements Consumer<T> {
                 var count = Arrays.stream(localDirectory.list())
                     .filter(y -> y.indexOf(".json") != -1)
                     .map(GitBrokerFileParser::new)
-                    //.filter(b -> b.getEvent().equals(event))
                     //.peek(System.out::println)
                     .count();
 

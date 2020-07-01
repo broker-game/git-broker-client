@@ -23,7 +23,6 @@ public class ConsumerTests extends BaseTestContainersTest {
 
         Producer<String> producer = client.newProducer()
             .topic("PINGPONG")
-            .node("PING-NODE")
             .create();
 
         String expectedMessage = "Hello World";
@@ -31,7 +30,6 @@ public class ConsumerTests extends BaseTestContainersTest {
 
         Consumer<String> consumer = client.newConsumer()
             .topic("PINGPONG")
-            .node("PING-NODE")
             .subscribe();
 
         Messages<String> response = consumer.batchReceive();
@@ -59,7 +57,6 @@ public class ConsumerTests extends BaseTestContainersTest {
 
         Consumer<String> consumer = client.newConsumer()
             .topic("PINGPONG")
-            .node("PING-NODE")
             .subscribe();
 
         Messages<String> response = consumer.batchReceive();
@@ -83,7 +80,6 @@ public class ConsumerTests extends BaseTestContainersTest {
 
         Producer<String> producer = client.newProducer()
             .topic("PINGPONG")
-            .node("PING-NODE")
             .create();
 
         String expectedMessage = "Hello World";
@@ -91,7 +87,6 @@ public class ConsumerTests extends BaseTestContainersTest {
 
         Consumer<String> consumer = client.newConsumer()
             .topic("PINGPONG")
-            .node("PING-NODE")
             .subscribe();
 
         Messages<String> response = consumer.batchReceive();
