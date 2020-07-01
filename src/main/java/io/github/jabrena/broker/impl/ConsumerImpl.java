@@ -26,6 +26,7 @@ import static java.util.stream.Collectors.toUnmodifiableList;
 @AllArgsConstructor
 public class ConsumerImpl<T> implements Consumer<T> {
 
+    private final GitBrokerClientImpl client;
     private final LocalDirectoryWrapper localRepositoryWrapper;
     private final GitClientWrapper gitWrapper;
 
@@ -40,11 +41,13 @@ public class ConsumerImpl<T> implements Consumer<T> {
      * @param topic application
      * @param node event
      */
-    public ConsumerImpl(@NonNull String broker,
+    public ConsumerImpl(@NonNull GitBrokerClientImpl client,
+                        @NonNull String broker,
                         @NonNull Authentication authentication,
                         @NonNull String topic,
                         String node) {
 
+        this.client = client;
         this.localRepositoryWrapper = new LocalDirectoryWrapper();
         this.gitWrapper = new GitClientWrapper();
 
@@ -56,6 +59,8 @@ public class ConsumerImpl<T> implements Consumer<T> {
         this.gitWrapper.cloneRepository(localRepositoryWrapper.getLocalFS(), this.broker);
         this.gitWrapper.setAuthentication(authentication);
         this.gitWrapper.checkout(this.topic);
+
+        client.addConsumer(this);
     }
 
     @Override
@@ -222,6 +227,8 @@ public class ConsumerImpl<T> implements Consumer<T> {
 
     @Override
     public void close() throws GitBrokerClientException {
+
+        LOGGER.info("Closing Consumer resources");
 
     }
 

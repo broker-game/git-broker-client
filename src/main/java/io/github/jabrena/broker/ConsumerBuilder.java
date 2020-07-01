@@ -1,11 +1,13 @@
 package io.github.jabrena.broker;
 
 import io.github.jabrena.broker.impl.ConsumerImpl;
+import io.github.jabrena.broker.impl.GitBrokerClientImpl;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 public class ConsumerBuilder {
 
+    private final GitBrokerClientImpl client;
     private final String broker;
     private final Authentication authentication;
 
@@ -28,6 +30,7 @@ public class ConsumerBuilder {
      */
     public Consumer subscribe() {
         return new ConsumerImpl(
+            client,
             broker,
             authentication,
             topic,

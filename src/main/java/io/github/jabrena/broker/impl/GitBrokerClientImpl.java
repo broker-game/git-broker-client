@@ -1,18 +1,28 @@
 package io.github.jabrena.broker.impl;
 
 import io.github.jabrena.broker.Authentication;
+import io.github.jabrena.broker.Consumer;
 import io.github.jabrena.broker.ConsumerBuilder;
 import io.github.jabrena.broker.GitBrokerClient;
+import io.github.jabrena.broker.Producer;
 import io.github.jabrena.broker.ProducerBuilder;
+import io.github.jabrena.broker.Reader;
 import io.github.jabrena.broker.ReaderBuilder;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Slf4j
 public class GitBrokerClientImpl implements GitBrokerClient {
 
     private final Authentication authentication;
     private final String broker;
+
+    private List<Producer> producerList;
+    private List<Consumer> consumerList;
+    private List<Reader> readerList;
 
     /**
      * Constructor
@@ -25,6 +35,11 @@ public class GitBrokerClientImpl implements GitBrokerClient {
 
         this.broker = broker;
         this.authentication = authentication;
+
+        producerList = new ArrayList<>();
+        consumerList = new ArrayList<>();
+        readerList = new ArrayList<>();
+
     }
 
     /**
@@ -33,38 +48,38 @@ public class GitBrokerClientImpl implements GitBrokerClient {
     @Override
     public void close() {
 
-        //TODO find a solution to close all objects provided
-        /*
-        if (Objects.nonNull(this.localRepositoryWrapper.getLocalFS())) {
-            try {
-                Files.walk(this.localRepositoryWrapper.getLocalFS().toPath())
-                    .sorted(Comparator.reverseOrder())
-                    .map(Path::toFile)
-                    .forEach(File::delete);
-                assert(!this.localRepositoryWrapper.getLocalFS().exists());
-            } catch (IOException e) {
-                LOGGER.warn(e.getLocalizedMessage(), e);
-            }
-        }
-         */
+        producerList.stream().forEach(p -> p.close());
+        consumerList.stream().forEach(c -> c.close());
+        readerList.stream().forEach(r -> r.close());
     }
 
     @Override
     public ProducerBuilder newProducer() {
 
-        return new ProducerBuilder(broker, authentication);
+        return new ProducerBuilder(this, broker, authentication);
     }
 
     @Override
     public ConsumerBuilder newConsumer() {
 
-        return new ConsumerBuilder(broker, authentication);
+        return new ConsumerBuilder(this, broker, authentication);
     }
 
     @Override
     public ReaderBuilder newReader() {
 
-        return new ReaderBuilder(broker);
+        return new ReaderBuilder(this, broker);
     }
 
+    void addProducer(Producer producer) {
+        producerList.add(producer);
+    }
+
+    void addConsumer(Consumer consumer) {
+        consumerList.add(consumer);
+    }
+
+    void addReader(Reader reader) {
+        readerList.add(reader);
+    }
 }

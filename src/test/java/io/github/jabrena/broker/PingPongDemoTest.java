@@ -63,6 +63,8 @@ public class PingPongDemoTest extends BaseTestContainersTest {
         }
         LOGGER.info("{}", counter);
         then(counter).isEqualTo(iterations);
+
+        client.close();
     }
 
     private interface Client<T> {

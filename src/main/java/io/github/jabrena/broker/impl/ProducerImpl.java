@@ -39,7 +39,8 @@ public final class ProducerImpl<T> implements Producer<T> {
      * @param topic application
      * @param node event
      */
-    public ProducerImpl(@NonNull String broker,
+    public ProducerImpl(GitBrokerClientImpl client,
+                        @NonNull String broker,
                         @NonNull Authentication authentication,
                         @NonNull String topic,
                         String node) {
@@ -55,6 +56,8 @@ public final class ProducerImpl<T> implements Producer<T> {
         this.gitWrapper.cloneRepository(localRepositoryWrapper.getLocalFS(), this.broker);
         this.gitWrapper.setAuthentication(authentication);
         this.gitWrapper.checkout(this.topic);
+
+        client.addProducer(this);
     }
 
     @Override
@@ -119,6 +122,8 @@ public final class ProducerImpl<T> implements Producer<T> {
     @Override
     public void close() throws GitBrokerClientException {
 
+        LOGGER.info("Closing Producer resources");
+        /*
         if (Objects.nonNull(this.localRepositoryWrapper.getLocalFS())) {
             try {
                 Files.walk(this.localRepositoryWrapper.getLocalFS().toPath())
@@ -131,6 +136,8 @@ public final class ProducerImpl<T> implements Producer<T> {
                 LOGGER.warn(e.getLocalizedMessage(), e);
             }
         }
+
+         */
     }
 
     @Override
