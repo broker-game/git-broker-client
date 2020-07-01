@@ -67,29 +67,6 @@ public class GitBrokerClientTests extends BaseTestContainersTest {
     }
 
     @Test
-    public void given_Client_when_call_newProducer_using_topic_without_node_and_create_then_Ko() {
-
-        Authentication authentication =
-            new Authentication("user", "user@my-email.com", "xxx", "yyy");
-
-        GitBrokerClient client = GitBrokerClient.builder()
-            .serviceUrl(BROKER_TEST_ADDRESS)
-            .authentication(authentication)
-            .build();
-
-        Exception exception = assertThrows(IllegalArgumentException.class, () -> {
-            client.newProducer()
-                .topic("PINGPONG")
-                .create();
-        });
-
-        String expectedMessage = "node is marked non-null but is null";
-        then(exception.getMessage()).isEqualTo(expectedMessage);
-
-        client.close();
-    }
-
-    @Test
     public void given_Client_when_call_newConsumer_then_Ok() {
 
         Authentication authentication =
@@ -102,32 +79,7 @@ public class GitBrokerClientTests extends BaseTestContainersTest {
 
         Consumer consumer = client.newConsumer()
             .topic("PINGPONG")
-            .node("PING-NODE")
             .subscribe();
-
-        client.close();
-    }
-
-    @Test
-    public void given_Client_when_call_newConsumer_node_then_Ok() {
-
-        Authentication authentication =
-            new Authentication("user", "user@my-email.com", "xxx", "yyy");
-
-        GitBrokerClient client = GitBrokerClient.builder()
-            .serviceUrl(BROKER_TEST_ADDRESS)
-            .authentication(authentication)
-            .build();
-
-        Exception exception = assertThrows(IllegalArgumentException.class, () -> {
-            client.newConsumer()
-                .topic("PINGPONG")
-                //.node("PING-NODE")
-                .subscribe();
-        });
-
-        String expectedMessage = "node is marked non-null but is null";
-        then(exception.getMessage()).isEqualTo(expectedMessage);
 
         client.close();
     }
@@ -145,7 +97,6 @@ public class GitBrokerClientTests extends BaseTestContainersTest {
 
         Producer<String> producer = client.newProducer()
             .topic("PINGPONG")
-            .node("PING-NODE")
             .create();
 
         String expectedMessage = "Hello World";
@@ -153,7 +104,6 @@ public class GitBrokerClientTests extends BaseTestContainersTest {
 
         Consumer<String> consumer = client.newConsumer()
             .topic("PINGPONG")
-            .node("PING-NODE")
             .subscribe();
 
         Messages<String> response = consumer.batchReceive();
@@ -181,7 +131,6 @@ public class GitBrokerClientTests extends BaseTestContainersTest {
 
         Producer<String> producer = client.newProducer()
             .topic("PINGPONG")
-            .node("PING-NODE")
             .create();
 
         String expectedMessage = "Hello World";

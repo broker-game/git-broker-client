@@ -22,7 +22,15 @@ public class ConsumerBuilder {
         return this;
     }
 
+    /**
+     * Subscribe
+     * @return ConsumerImpl
+     */
     public Consumer subscribe() {
-        return new ConsumerImpl(broker, authentication, topic, node);
+        return new ConsumerImpl(
+            broker,
+            authentication,
+            topic,
+            node);
     }
 }

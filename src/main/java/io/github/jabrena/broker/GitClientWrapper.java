@@ -57,18 +57,6 @@ public class GitClientWrapper {
                 .setURI(repository)
                 .setDirectory(file)
                 .call();
-
-            /*
-            LOGGER.debug("Switching to branch: {}", branch);
-            git.checkout()
-                .setCreateBranch(true)
-                .setName(branch)
-                .call();
-
-             */
-
-            showLogs();
-
         } catch (RefNotFoundException e) {
             LOGGER.warn("Empty repository");
             LOGGER.warn(e.getLocalizedMessage());
