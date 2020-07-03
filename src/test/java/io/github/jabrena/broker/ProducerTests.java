@@ -60,11 +60,11 @@ public class ProducerTests extends TestContainersBaseTest {
             .topic("PINGPONG")
             .create();
 
-        CompletableFuture<String> future = producer.sendAsync("Hello World");
-        future.thenApply(msgId -> {
-            LOGGER.info("Sent message with messageId {}", msgId);
-            return null;
-        }).join();
+        var future = producer.sendAsync("Hello World");
+        future
+            .thenApply(s -> s.toUpperCase())
+            .thenAccept(LOGGER::info)
+            .join();
 
         client.close();
     }

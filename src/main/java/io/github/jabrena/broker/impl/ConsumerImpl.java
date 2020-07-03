@@ -206,6 +206,11 @@ public class ConsumerImpl<T> implements Consumer<T> {
         return emptyMessages();
     }
 
+    @Override
+    public CompletableFuture<Messages<T>> batchReceiveAsync() {
+        return CompletableFuture.supplyAsync(() -> this.batchReceive());
+    }
+
     private Messages<T> emptyMessages() {
 
         return new Messages<T>() {

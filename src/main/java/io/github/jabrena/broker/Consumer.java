@@ -16,6 +16,8 @@ public interface Consumer<T> extends Closeable {
 
     Messages<T> batchReceive();
 
+    CompletableFuture<Messages<T>> batchReceiveAsync();
+
     CompletableFuture<Void> closeAsync();
 
     boolean hasReachedEndOfTopic();

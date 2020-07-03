@@ -212,4 +212,31 @@ public class ConsumerTests extends TestContainersBaseTest {
 
         client.close();
     }
+
+    @Test
+    public void given_Consumer_when_consumeAsync_then_Ok() {
+
+        Authentication authentication =
+            new Authentication("user", "user@my-email.com", "xxx", "yyy");
+
+        GitBrokerClient client = GitBrokerClient.builder()
+            .serviceUrl(BROKER_TEST_ADDRESS)
+            .authentication(authentication)
+            .build();
+
+        Consumer<String> consumer = client.newConsumer()
+            .topic("PINGPONG")
+            .subscribe();
+
+        var future = consumer.batchReceiveAsync();
+        future
+            .thenApply(response -> {
+                var count = StreamSupport.stream(response.spliterator(), false).count();
+                then(count).isEqualTo(0);
+                return count;
+            })
+            .join();
+
+        client.close();
+    }
 }
