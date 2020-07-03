@@ -8,7 +8,7 @@ import java.util.stream.IntStream;
 import static org.assertj.core.api.BDDAssertions.then;
 
 @Slf4j
-public class ReaderTests extends BaseTestContainersTest {
+public class ReaderTests extends TestContainersBaseTest {
 
     @Test
     public void given_Reader_when_iterate_then_Ok() {

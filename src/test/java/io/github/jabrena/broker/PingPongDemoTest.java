@@ -16,7 +16,7 @@ import static java.util.stream.Collectors.toList;
 import static org.assertj.core.api.BDDAssertions.then;
 
 @Slf4j
-public class PingPongDemoTest extends BaseTestContainersTest {
+public class PingPongDemoTest extends TestContainersBaseTest {
 
     @Tag("complex")
     @Test

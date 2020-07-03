@@ -1,12 +1,15 @@
 package io.github.jabrena.broker;
 
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.StreamSupport;
 
 import static org.assertj.core.api.BDDAssertions.then;
 
-public class ProducerTests extends BaseTestContainersTest {
+@Slf4j
+public class ProducerTests extends TestContainersBaseTest {
 
     @Test
     public void given_Producer_when_send_then_Ok() {
@@ -38,6 +41,30 @@ public class ProducerTests extends BaseTestContainersTest {
             .map(x -> x.getValue())
             .findFirst().get())
             .isEqualTo(expectedMessage);
+
+        client.close();
+    }
+
+    @Test
+    public void given_Producer_when_sendAsync_then_Ok() {
+
+        Authentication authentication =
+            new Authentication("user", "user@my-email.com", "xxx", "yyy");
+
+        GitBrokerClient client = GitBrokerClient.builder()
+            .serviceUrl(BROKER_TEST_ADDRESS)
+            .authentication(authentication)
+            .build();
+
+        Producer<String> producer = client.newProducer()
+            .topic("PINGPONG")
+            .create();
+
+        CompletableFuture<String> future = producer.sendAsync("Hello World");
+        future.thenApply(msgId -> {
+            LOGGER.info("Sent message with messageId {}", msgId);
+            return null;
+        }).join();
 
         client.close();
     }

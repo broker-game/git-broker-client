@@ -13,6 +13,7 @@ import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
@@ -176,6 +177,7 @@ public class ConsumerImpl<T> implements Consumer<T> {
                     var list = Arrays.stream(localDirectory.list())
                         .filter(y -> y.indexOf(".json") != -1)
                         .map(GitBrokerFileParser::new)
+                        .sorted(Comparator.comparingLong(GitBrokerFileParser::getEpoch))
                         .collect(toUnmodifiableList());
 
                     writeCheckpoint();
@@ -229,6 +231,21 @@ public class ConsumerImpl<T> implements Consumer<T> {
     public void close() throws GitBrokerClientException {
 
         LOGGER.info("Closing Consumer resources");
+
+    }
+
+    @Override
+    public void acknowledge(Message<T> msg) {
+
+        long id = msg.getPublishTime();
+
+        var pattern = new StringBuilder()
+            .append(id)
+            .append(".json")
+            .toString();
+        LOGGER.info("acknowledge for: {}", pattern);
+        gitWrapper.removeFile(pattern);
+        gitWrapper.push();
 
     }
 
