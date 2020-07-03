@@ -137,7 +137,7 @@ public class ConsumerTests extends TestContainersBaseTest {
             .create();
 
         String expectedMessage = "Hello World";
-        var idList = IntStream.rangeClosed(1,5).boxed()
+        var idList = IntStream.rangeClosed(1, 5).boxed()
             .map(i -> producer.send(expectedMessage))
             .collect(toUnmodifiableList());
 
