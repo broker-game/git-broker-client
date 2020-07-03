@@ -30,4 +30,7 @@ public interface Reader<T> extends Closeable {
     void seek(long timestamp) throws GitBrokerClientException;
 
     CompletableFuture<Void> seekAsync(long timestamp);
+
+    @Override
+    void close() throws GitBrokerClientException;
 }

@@ -9,7 +9,7 @@ import static org.assertj.core.api.BDDAssertions.then;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @Slf4j
-public class GitBrokerClientTests extends BaseTestContainersTest {
+public class GitBrokerClientTests extends TestContainersBaseTest {
 
     @Test
     public void given_ClientBuilder_when_buildWithServiceUrl_then_createClient() {

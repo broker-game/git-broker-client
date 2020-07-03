@@ -6,8 +6,8 @@ import io.github.jabrena.broker.GitClientWrapper;
 import io.github.jabrena.broker.LocalDirectoryWrapper;
 import io.github.jabrena.broker.Message;
 import io.github.jabrena.broker.Reader;
+import lombok.extern.slf4j.Slf4j;
 
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
@@ -15,8 +15,10 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import static java.util.stream.Collectors.toUnmodifiableList;
 
+@Slf4j
 public class ReaderImpl<T> implements Reader<T> {
 
+    private final GitBrokerClientImpl client;
     private final LocalDirectoryWrapper localRepositoryWrapper;
     private final GitClientWrapper gitWrapper;
 
@@ -30,8 +32,12 @@ public class ReaderImpl<T> implements Reader<T> {
      *
      * @param topic topic
      */
-    public ReaderImpl(String broker, String topic) {
+    public ReaderImpl(
+            GitBrokerClientImpl client,
+            String broker,
+            String topic) {
 
+        this.client = client;
         this.localRepositoryWrapper = new LocalDirectoryWrapper();
         this.gitWrapper = new GitClientWrapper();
 
@@ -39,6 +45,8 @@ public class ReaderImpl<T> implements Reader<T> {
         this.topic = topic;
 
         init();
+
+        client.addReader(this);
     }
 
     private void init() {
@@ -117,7 +125,8 @@ public class ReaderImpl<T> implements Reader<T> {
     }
 
     @Override
-    public void close() throws IOException {
+    public void close() {
 
+        LOGGER.info("Closing Reader resources");
     }
 }

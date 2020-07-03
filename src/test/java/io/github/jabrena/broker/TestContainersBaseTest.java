@@ -17,7 +17,7 @@ import java.io.IOException;
 
 @Slf4j
 @Testcontainers
-abstract class BaseTestContainersTest {
+abstract class TestContainersBaseTest {
 
     protected static String BROKER_TEST_ADDRESS;
 

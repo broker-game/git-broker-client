@@ -1,4 +1,4 @@
-# Broker client
+# Git Broker client
 
 A Slow Event Streaming client for Git
 

@@ -30,15 +30,13 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.StreamSupport;
 
 @Slf4j
 public class GitClientWrapper {
 
-    //Git repository
     private Git git;
-
     private String repository;
+    private File localDirectory;
     private Authentication authentication;
 
     /**
@@ -49,6 +47,7 @@ public class GitClientWrapper {
      */
     public void cloneRepository(File file, String repository) {
 
+        this.localDirectory = file;
         this.repository = repository;
 
         try {
@@ -118,16 +117,23 @@ public class GitClientWrapper {
      * @param fileName filename
      * @param content content
      */
-    public void addFile(File file, String fileName, String content) {
+    public String addFile(File file, String fileName, String content) {
 
+        String id = "";
         try {
             Files.writeString(file.toPath().resolve(fileName), content);
-            git.add().addFilepattern(fileName).call();
-            git.commit()
+            git.add()
+                .addFilepattern(fileName)
+                .call();
+
+            RevCommit rev = git.commit()
                 .setMessage("Creating file: " + fileName)
                 .setAuthor(this.authentication.getFullName(), this.authentication.getEmail())
                 .call();
-        } catch (UnmergedPathsException |
+
+            id = rev.getId().getName();
+        } catch (
+            UnmergedPathsException |
             WrongRepositoryStateException |
             AbortedByHookException |
             NoMessageException |
@@ -137,6 +143,25 @@ public class GitClientWrapper {
             IOException e) {
 
             LOGGER.warn(e.getLocalizedMessage(), e);
+        } catch (GitAPIException e) {
+            LOGGER.warn(e.getLocalizedMessage(), e);
+        }
+
+        return id;
+    }
+
+    public void removeFile(String fileName) {
+        try {
+
+            git.rm()
+                .addFilepattern(fileName)
+                .call();
+
+            git.commit()
+                .setMessage("Removing file: " + fileName)
+                .setAuthor(this.authentication.getFullName(), this.authentication.getEmail())
+                .call();
+
         } catch (GitAPIException e) {
             LOGGER.warn(e.getLocalizedMessage(), e);
         }
@@ -151,15 +176,12 @@ public class GitClientWrapper {
 
             CredentialsProvider cp = new UsernamePasswordCredentialsProvider(
                     this.authentication.getUser(), this.authentication.getPassword());
+
             Iterable<PushResult> results = git.push()
                 .setRemote("origin")
                 .setCredentialsProvider(cp)
                 .call();
 
-            StreamSupport.stream(results.spliterator(), false)
-                .forEach(result -> {
-                    LOGGER.info(result.getMessages());
-                });
         } catch (InvalidRemoteException | TransportException e) {
             LOGGER.warn(e.getLocalizedMessage(), e);
         } catch (GitAPIException e) {

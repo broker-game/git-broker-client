@@ -31,4 +31,5 @@ public interface Consumer<T> extends Closeable {
     @Override
     void close() throws GitBrokerClientException;
 
+    void acknowledge(Message<T> msg);
 }
