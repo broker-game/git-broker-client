@@ -12,13 +12,9 @@ import lombok.NonNull;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.Comparator;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.atomic.AtomicLong;
 
 @Slf4j
 public final class ProducerImpl<T> implements Producer<T> {
@@ -104,10 +100,20 @@ public final class ProducerImpl<T> implements Producer<T> {
         return getEpoch() + ".json";
     }
 
-    private long getEpoch() {
-        return System.currentTimeMillis();
-    }
+    private static final AtomicLong LAST_TIME_MS = new AtomicLong();
 
+    public static long getEpoch() {
+        long now = System.currentTimeMillis();
+        while(true) {
+            long lastTime = LAST_TIME_MS.get();
+            if (lastTime >= now) {
+                now = lastTime + 1;
+            }
+            if (LAST_TIME_MS.compareAndSet(lastTime, now)) {
+                return now;
+            }
+        }
+    }
 
     @Override
     public CompletableFuture<String> sendAsync(T message) {
