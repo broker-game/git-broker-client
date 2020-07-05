@@ -333,7 +333,7 @@ dependency:
 </dependency>
 ```
 
-- https://jitpack.io/#broker-game/broker-client/0.3.0
+- https://jitpack.io/#broker-game/git-broker-client/0.4.0
 
 ## How to build the project?
 
