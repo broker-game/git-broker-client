@@ -372,4 +372,65 @@ public class ConsumerTests extends TestContainersBaseTest {
 
         client.close();
     }
+
+    @Test
+    public void given_MultipleConsumers_when_batchReceiveAsync_and_allOf_then_Ok() {
+
+        Authentication authentication =
+            new Authentication("user", "user@my-email.com", "xxx", "yyy");
+
+        GitBrokerClient client = GitBrokerClient.builder()
+            .serviceUrl(BROKER_TEST_ADDRESS)
+            .authentication(authentication)
+            .build();
+
+        final String topic = "PINGPONG";
+        Producer<String> producer = client.newProducer()
+            .topic(topic)
+            .create();
+
+        String expectedMessage = "Hello World";
+        producer.send(expectedMessage);
+
+        final String node1 = "PING-NODE1";
+        final String node2 = "PING-NODE2";
+        Consumer<String> consumer1 = client.newConsumer()
+            .topic(topic)
+            .node(node1)
+            .subscribe();
+        Consumer<String> consumer2 = client.newConsumer()
+            .topic(topic)
+            .node(node2)
+            .subscribe();
+
+        var futures = List.of(
+            consumer1.batchReceiveAsync(),
+            consumer2.batchReceiveAsync());
+
+        StringBuilder result = new StringBuilder();
+        CompletableFuture.allOf(futures.toArray(new CompletableFuture[futures.size()]))
+            .whenComplete((v, th) -> {
+                futures.forEach(cf -> cf.join());
+                result.append("done");
+        });
+        then(result.length() > 0);
+
+        Reader<String> reader = client.newReader()
+            .topic(topic)
+            .create();
+
+        int counter = 0;
+        while (true) {
+            if (reader.hasReachedEndOfTopic()) {
+                break;
+            }
+            Message<String> value = reader.readNext();
+            LOGGER.info("D: {}", value.getValue());
+            counter++;
+        }
+
+        then(counter).isEqualTo(1);
+
+        client.close();
+    }
 }

@@ -16,9 +16,9 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicLong;
 
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toUnmodifiableList;
@@ -87,8 +87,24 @@ public class ConsumerImpl<T> implements Consumer<T> {
         return getEpoch() + "_" + this.node + "_" + event + ".json";
     }
 
-    private long getEpoch() {
-        return System.currentTimeMillis();
+    private static final AtomicLong LAST_TIME_MS = new AtomicLong();
+
+    /**
+     * GetEpoch
+     *
+     * @return epoch
+     */
+    public static long getEpoch() {
+        long now = System.currentTimeMillis();
+        while (true) {
+            long lastTime = LAST_TIME_MS.get();
+            if (lastTime >= now) {
+                now = lastTime + 1;
+            }
+            if (LAST_TIME_MS.compareAndSet(lastTime, now)) {
+                return now;
+            }
+        }
     }
 
     @Override
