@@ -46,7 +46,7 @@ public class ConsumerImpl<T> implements Consumer<T> {
                         @NonNull String broker,
                         @NonNull Authentication authentication,
                         @NonNull String topic,
-                        String node) {
+                        @NonNull String node) {
 
         this.client = client;
         this.localRepositoryWrapper = new LocalDirectoryWrapper();
@@ -84,9 +84,6 @@ public class ConsumerImpl<T> implements Consumer<T> {
     }
 
     private String getFilename(String event) {
-        if (Objects.isNull(this.node)) {
-            return getEpoch() + "_" + event + ".json";
-        }
         return getEpoch() + "_" + this.node + "_" + event + ".json";
     }
 
@@ -121,7 +118,7 @@ public class ConsumerImpl<T> implements Consumer<T> {
 
             //Detect last checkpoints
             var checkPointList = Arrays.stream(localDirectory.list())
-                .filter(y -> y.indexOf("OK.json") != -1)
+                .filter(y -> y.indexOf(this.node + "_OK.json") != -1)
                 .sorted()
                 .collect(toList());
 
@@ -168,7 +165,6 @@ public class ConsumerImpl<T> implements Consumer<T> {
                 var count = Arrays.stream(localDirectory.list())
                     .filter(y -> y.indexOf(".json") != -1)
                     .map(GitBrokerFileParser::new)
-                    //.peek(System.out::println)
                     .count();
 
                 if (count > 0) {
@@ -176,6 +172,7 @@ public class ConsumerImpl<T> implements Consumer<T> {
 
                     var list = Arrays.stream(localDirectory.list())
                         .filter(y -> y.indexOf(".json") != -1)
+                        .filter(y -> y.indexOf("OK.json") == -1)
                         .map(GitBrokerFileParser::new)
                         .sorted(Comparator.comparingLong(GitBrokerFileParser::getEpoch))
                         .collect(toUnmodifiableList());

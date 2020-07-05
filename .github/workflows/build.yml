@@ -13,5 +13,5 @@ jobs:
               with:
                   java-version: 11
             - name: Build with Maven
-              run: mvn clean test -DexcludedGroups=complex
+              run: mvn clean test
 

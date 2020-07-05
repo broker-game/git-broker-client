@@ -102,9 +102,14 @@ public final class ProducerImpl<T> implements Producer<T> {
 
     private static final AtomicLong LAST_TIME_MS = new AtomicLong();
 
+    /**
+     * GetEpoch
+     *
+     * @return epoch
+     */
     public static long getEpoch() {
         long now = System.currentTimeMillis();
-        while(true) {
+        while (true) {
             long lastTime = LAST_TIME_MS.get();
             if (lastTime >= now) {
                 now = lastTime + 1;

@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.IntStream;
 import java.util.stream.StreamSupport;
 
@@ -81,15 +82,16 @@ public class ConsumerTests extends TestContainersBaseTest {
             .authentication(authentication)
             .build();
 
+        final String topic = "PINGPONG";
         Producer<String> producer = client.newProducer()
-            .topic("PINGPONG")
+            .topic(topic)
             .create();
 
         String expectedMessage = "Hello World";
         producer.send(expectedMessage);
 
         Consumer<String> consumer = client.newConsumer()
-            .topic("PINGPONG")
+            .topic(topic)
             .subscribe();
 
         Messages<String> response = consumer.batchReceive();
@@ -214,7 +216,7 @@ public class ConsumerTests extends TestContainersBaseTest {
     }
 
     @Test
-    public void given_Consumer_when_consumeAsync_then_Ok() {
+    public void given_Consumer_when_batchReceiveAsync_then_Ok() {
 
         Authentication authentication =
             new Authentication("user", "user@my-email.com", "xxx", "yyy");
@@ -224,18 +226,149 @@ public class ConsumerTests extends TestContainersBaseTest {
             .authentication(authentication)
             .build();
 
+        final String topic = "PINGPONG";
+        final String node = "PING-NODE";
+
+        Producer<String> producer = client.newProducer()
+            .topic(topic)
+            .create();
+
+        String expectedMessage = "Hello World";
+        producer.send(expectedMessage);
+
         Consumer<String> consumer = client.newConsumer()
-            .topic("PINGPONG")
+            .topic(topic)
+            .node(node)
             .subscribe();
 
         var future = consumer.batchReceiveAsync();
         future
             .thenApply(response -> {
                 var count = StreamSupport.stream(response.spliterator(), false).count();
-                then(count).isEqualTo(0);
+                then(count).isEqualTo(1);
                 return count;
             })
             .join();
+
+        client.close();
+    }
+
+    @Test
+    public void given_MultipleConsumers_when_batchReceive_then_Ok() {
+
+        Authentication authentication =
+            new Authentication("user", "user@my-email.com", "xxx", "yyy");
+
+        GitBrokerClient client = GitBrokerClient.builder()
+            .serviceUrl(BROKER_TEST_ADDRESS)
+            .authentication(authentication)
+            .build();
+
+        final String topic = "PINGPONG";
+        Producer<String> producer = client.newProducer()
+            .topic(topic)
+            .create();
+
+        String expectedMessage = "Hello World";
+        producer.send(expectedMessage);
+
+        final String node1 = "PING-NODE1";
+        final String node2 = "PING-NODE2";
+        Consumer<String> consumer1 = client.newConsumer()
+            .topic(topic)
+            .node(node1)
+            .subscribe();
+
+        var messages1 = consumer1.batchReceive();
+        var count1 = StreamSupport.stream(messages1.spliterator(), false).count();
+        then(count1).isEqualTo(1);
+
+        Consumer<String> consumer2 = client.newConsumer()
+            .topic(topic)
+            .node(node2)
+            .subscribe();
+
+        var messages2 = consumer2.batchReceive();
+        var count2 = StreamSupport.stream(messages2.spliterator(), false).count();
+        then(count2).isEqualTo(1);
+
+        Reader<String> reader = client.newReader()
+            .topic(topic)
+            .create();
+
+        int counter = 0;
+        while (true) {
+            if (reader.hasReachedEndOfTopic()) {
+                break;
+            }
+            Message<String> value = reader.readNext();
+            LOGGER.info("D: {}", value.getValue());
+            counter++;
+        }
+
+        then(counter).isEqualTo(1);
+
+        client.close();
+    }
+
+    @Test
+    public void given_MultipleConsumers_when_batchReceiveAsync_then_Ok() {
+
+        Authentication authentication =
+            new Authentication("user", "user@my-email.com", "xxx", "yyy");
+
+        GitBrokerClient client = GitBrokerClient.builder()
+            .serviceUrl(BROKER_TEST_ADDRESS)
+            .authentication(authentication)
+            .build();
+
+        final String topic = "PINGPONG";
+        Producer<String> producer = client.newProducer()
+            .topic(topic)
+            .create();
+
+        String expectedMessage = "Hello World";
+        producer.send(expectedMessage);
+
+        final String node1 = "PING-NODE1";
+        final String node2 = "PING-NODE2";
+        Consumer<String> consumer1 = client.newConsumer()
+            .topic(topic)
+            .node(node1)
+            .subscribe();
+        Consumer<String> consumer2 = client.newConsumer()
+            .topic(topic)
+            .node(node2)
+            .subscribe();
+
+        var futures = List.of(
+            consumer1.batchReceiveAsync(),
+            consumer2.batchReceiveAsync());
+        var list = futures.stream()
+            .map(CompletableFuture::join)
+            .flatMap(messages ->
+                StreamSupport.stream(messages.spliterator(), false)
+                    .map(m -> m.getValue()))
+            .peek(s -> LOGGER.info(s))
+            .collect(toUnmodifiableList());
+
+        then(list.size()).isEqualTo(2);
+
+        Reader<String> reader = client.newReader()
+            .topic(topic)
+            .create();
+
+        int counter = 0;
+        while (true) {
+            if (reader.hasReachedEndOfTopic()) {
+                break;
+            }
+            Message<String> value = reader.readNext();
+            LOGGER.info("D: {}", value.getValue());
+            counter++;
+        }
+
+        then(counter).isEqualTo(1);
 
         client.close();
     }

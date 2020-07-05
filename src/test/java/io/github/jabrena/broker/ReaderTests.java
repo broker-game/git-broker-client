@@ -41,8 +41,9 @@ public class ReaderTests extends TestContainersBaseTest {
             .authentication(authentication)
             .build();
 
+        final String topic = "PINGPONG";
         Producer<String> producer = client.newProducer()
-            .topic("PINGPONG")
+            .topic(topic)
             .create();
 
         String expectedMessage = "Hello World";
@@ -51,7 +52,7 @@ public class ReaderTests extends TestContainersBaseTest {
             .forEach(x -> producer.send(expectedMessage));
 
         Reader<String> reader = client.newReader()
-            .topic("PINGPONG")
+            .topic(topic)
             .create();
 
         int counter = 0;
