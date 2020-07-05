@@ -45,12 +45,32 @@ which offer `free` git accounts to store the code.
 ## Limitations:
 
 - It is not possible to create a Node in High Availability
+- It is not possible to send multiple message in parallel with the same Producer Object
 
 ## Examples
 
+### Example1: Ping Pong
+
 ``` java
+package io.github.jabrena.broker;
+
+import lombok.NonNull;
+import lombok.extern.slf4j.Slf4j;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
+
+import java.util.List;
+import java.util.Objects;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.IntStream;
+import java.util.stream.StreamSupport;
+
+import static java.util.stream.Collectors.toList;
+import static org.assertj.core.api.BDDAssertions.then;
+
 @Slf4j
-public class PingPongDemoTest extends BaseTestContainersTest {
+public class PingPongDemoTest extends TestContainersBaseTest {
 
     @Tag("complex")
     @Test
@@ -97,6 +117,8 @@ public class PingPongDemoTest extends BaseTestContainersTest {
         }
         LOGGER.info("{}", counter);
         then(counter).isEqualTo(iterations);
+
+        client.close();
     }
 
     private interface Client<T> {
@@ -175,6 +197,112 @@ public class PingPongDemoTest extends BaseTestContainersTest {
         }
     }
 }
+
+```
+
+### Multiple Producers in Parallel
+
+``` java
+@Test
+public void given_MultipleProducers_when_sendAsyncInParallel_then_Ok() {
+
+    Authentication authentication =
+        new Authentication("user", "user@my-email.com", "xxx", "yyy");
+
+    GitBrokerClient client = GitBrokerClient.builder()
+        .serviceUrl(BROKER_TEST_ADDRESS)
+        .authentication(authentication)
+        .build();
+
+    final String topic = "PINGPONG";
+    Producer<String> producer = client.newProducer()
+        .topic(topic)
+        .create();
+
+    Producer<String> producer2 = client.newProducer()
+        .topic(topic)
+        .create();
+
+    final String message = "Hello World";
+    var futures = List.of(
+        producer.sendAsync(message),
+        producer2.sendAsync(message));
+    var list = futures.stream()
+        .map(CompletableFuture::join)
+        .peek(s -> LOGGER.info(s))
+        .collect(toUnmodifiableList());
+
+    then(verifyAllElementsAreDifferent(list)).isTrue();
+
+    client.close();
+}
+```
+
+### Multiple Consumers in Parallel
+
+``` java
+@Test
+public void given_MultipleConsumers_when_batchReceiveAsync_then_Ok() {
+
+    Authentication authentication =
+        new Authentication("user", "user@my-email.com", "xxx", "yyy");
+
+    GitBrokerClient client = GitBrokerClient.builder()
+        .serviceUrl(BROKER_TEST_ADDRESS)
+        .authentication(authentication)
+        .build();
+
+    final String topic = "PINGPONG";
+    Producer<String> producer = client.newProducer()
+        .topic(topic)
+        .create();
+
+    String expectedMessage = "Hello World";
+    producer.send(expectedMessage);
+
+    final String node1 = "PING-NODE1";
+    final String node2 = "PING-NODE2";
+    Consumer<String> consumer1 = client.newConsumer()
+        .topic(topic)
+        .node(node1)
+        .subscribe();
+    Consumer<String> consumer2 = client.newConsumer()
+        .topic(topic)
+        .node(node2)
+        .subscribe();
+
+    var futures = List.of(
+        consumer1.batchReceiveAsync(),
+        consumer2.batchReceiveAsync());
+    var list = futures.stream()
+        .map(CompletableFuture::join)
+        .flatMap(messages ->
+            StreamSupport.stream(messages.spliterator(), false)
+                .map(m -> m.getValue()))
+        .peek(s -> LOGGER.info(s))
+        .collect(toUnmodifiableList());
+
+    then(list.size()).isEqualTo(2);
+
+    Reader<String> reader = client.newReader()
+        .topic(topic)
+        .create();
+
+    int counter = 0;
+    while (true) {
+        if (reader.hasReachedEndOfTopic()) {
+            break;
+        }
+        Message<String> value = reader.readNext();
+        LOGGER.info("D: {}", value.getValue());
+        counter++;
+    }
+
+    then(counter).isEqualTo(1);
+
+    client.close();
+}
+
 ```
 
 ## JDK Requeriments in EV3
@@ -226,10 +354,9 @@ dependency:
 ## How to build the project?
 
 ```
-mvn clean test -DexcludedGroups=complex
-
+mvn clean test
 
 # Generate Checkstyle report
 mvn clean site -DskipTests
-mvn clean test site -DexcludedGroups=complex
+mvn clean test site
 ```

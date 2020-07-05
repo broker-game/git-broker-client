@@ -4,6 +4,8 @@ import io.github.jabrena.broker.impl.ConsumerImpl;
 import io.github.jabrena.broker.impl.GitBrokerClientImpl;
 import lombok.RequiredArgsConstructor;
 
+import java.util.Objects;
+
 @RequiredArgsConstructor
 public class ConsumerBuilder {
 
@@ -29,6 +31,11 @@ public class ConsumerBuilder {
      * @return ConsumerImpl
      */
     public Consumer subscribe() {
+
+        if (Objects.isNull(this.node)) {
+            this.node = "DEFAULT-NODE";
+        }
+
         return new ConsumerImpl(
             client,
             broker,

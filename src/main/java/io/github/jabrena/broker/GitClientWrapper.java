@@ -42,7 +42,7 @@ public class GitClientWrapper {
     /**
      * Clone a repository
      *
-     * @param file file
+     * @param file       file
      * @param repository repository
      */
     public void cloneRepository(File file, String repository) {
@@ -66,6 +66,7 @@ public class GitClientWrapper {
 
     /**
      * Checkout
+     *
      * @param branch Git Branch
      */
     public void checkout(String branch) {
@@ -113,9 +114,9 @@ public class GitClientWrapper {
     /**
      * Add File
      *
-     * @param file file
+     * @param file     file
      * @param fileName filename
-     * @param content content
+     * @param content  content
      */
     public String addFile(File file, String fileName, String content) {
 
@@ -132,14 +133,8 @@ public class GitClientWrapper {
                 .call();
 
             id = rev.getId().getName();
-        } catch (
-            UnmergedPathsException |
-            WrongRepositoryStateException |
-            AbortedByHookException |
-            NoMessageException |
-            NoFilepatternException |
-            NoHeadException |
-            ConcurrentRefUpdateException |
+        } catch (UnmergedPathsException | WrongRepositoryStateException | AbortedByHookException |
+            NoMessageException | NoFilepatternException | NoHeadException | ConcurrentRefUpdateException |
             IOException e) {
 
             LOGGER.warn(e.getLocalizedMessage(), e);
@@ -150,6 +145,10 @@ public class GitClientWrapper {
         return id;
     }
 
+    /**
+     * Remove a file
+     * @param fileName fileName
+     */
     public void removeFile(String fileName) {
         try {
 
@@ -175,7 +174,7 @@ public class GitClientWrapper {
         try {
 
             CredentialsProvider cp = new UsernamePasswordCredentialsProvider(
-                    this.authentication.getUser(), this.authentication.getPassword());
+                this.authentication.getUser(), this.authentication.getPassword());
 
             Iterable<PushResult> results = git.push()
                 .setRemote("origin")
