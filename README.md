@@ -328,8 +328,8 @@ dependency:
 ```
 <dependency>
     <groupId>com.github.broker-game</groupId>
-    <artifactId>broker-client</artifactId>
-    <version>0.3.0</version>
+    <artifactId>git-broker-client</artifactId>
+    <version>0.4.0</version>
 </dependency>
 ```
 
