@@ -52,22 +52,6 @@ which offer `free` git accounts to store the code.
 ### Example1: Ping Pong
 
 ``` java
-package io.github.jabrena.broker;
-
-import lombok.NonNull;
-import lombok.extern.slf4j.Slf4j;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Test;
-
-import java.util.List;
-import java.util.Objects;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.IntStream;
-import java.util.stream.StreamSupport;
-
-import static java.util.stream.Collectors.toList;
-import static org.assertj.core.api.BDDAssertions.then;
 
 @Slf4j
 public class PingPongDemoTest extends TestContainersBaseTest {
